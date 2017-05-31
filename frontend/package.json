@@ -1,0 +1,8 @@
+{
+  "name": "kerkel_js_frontend",
+  "private": true,
+  "dependencies": {
+    "babel-core": "^6.24.1",
+    "webpack": "^2.6.1"
+  }
+}

@@ -1,9 +1,10 @@
 {
-  "name": "kerkel-js",
+  "name": "kerkel_js",
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "server": "node ./bin/www",
+    "webpack": "cd frontend && node_modules/.bin/webpack --watch"
   },
   "dependencies": {
     "body-parser": "~1.17.1",
@@ -12,7 +13,6 @@
     "express": "~4.15.2",
     "hbs": "~4.0.1",
     "morgan": "~1.8.1",
-    "node-sass-middleware": "0.9.8",
     "serve-favicon": "~2.4.2"
   }
 }
