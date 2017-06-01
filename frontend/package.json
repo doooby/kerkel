@@ -3,6 +3,11 @@
   "private": true,
   "dependencies": {
     "babel-core": "^6.24.1",
+    "bootstrap": "4.0.0-alpha.6",
+    "css-loader": "^0.28.4",
+    "extract-text-webpack-plugin": "^2.1.0",
+    "node-sass": "^4.5.3",
+    "sass-loader": "^6.0.5",
     "webpack": "^2.6.1"
   }
 }

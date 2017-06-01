@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "server": "node ./bin/www",
-    "webpack": "cd frontend && node_modules/.bin/webpack --watch"
+    "webpack": "cd frontend && rm -rf build && node_modules/.bin/webpack --watch"
   },
   "dependencies": {
     "body-parser": "~1.17.1",

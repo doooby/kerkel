@@ -1,0 +1,45 @@
+$k-panel-bg-color: #000000;
+$k-panel-bg2-color: #777777;
+$k-panel-contrast-color: #ffffff;
+$k-panel-margin: 5;
+
+$k-menu-height: 30;
+$k-users-list-height:100;
+$k-messages-list: 250;
+$k-chat-input-height: 20;
+$k-app-height: $k-menu-height + $k-users-list-height + $k-messages-list + $k-chat-input-height + 5*$k-panel-margin;
+
+$k-left-panel-width: 140;
+
+
+$global-margin: 0.31rem;
+$button-padding: 0.3em 0.3em;
+$button-background: $k-panel-bg2-color;
+
+html {
+  height: 100%;
+}
+
+body.full-height {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .top_row {
+    flex: 0 0;
+  }
+}
+
+#kerkel-app {
+  flex: 1 1;
+  height: 100%;
+
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .k-app-container {
+  }
+
+}
