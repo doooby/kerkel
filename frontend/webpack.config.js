@@ -21,7 +21,7 @@ var extract_plugin_use = extractPlugin.extract({
 
 module.exports = {
     entry: {
-        "kerkel_app.js": './index.js',
+        "kerkel_app.js": './index.jsx',
         ".styles": './styles/index.scss'
     },
     output: {
@@ -34,8 +34,18 @@ module.exports = {
             {
                 test: /\.scss$/,
                 use: extract_plugin_use
+            },
+
+            {
+                test: /\.jsx?$/,
+                loader: 'babel-loader',
+                exclude: /node_modules/
             }
         ]
+    },
+
+    resolve: {
+        extensions: ['.js', '.jsx']
     },
 
     plugins: [
