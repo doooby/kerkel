@@ -10,9 +10,8 @@ export default class AppContainer extends preact.Component {
 
     render ({app}) {
         return <div
-            className="k-app-container k-panel clearfix"
+            className="k-app-container k-panel"
             ref={el => app.app_container = el}
-            // style={{height: `${1}px`}}
         >
 
             <div
@@ -23,12 +22,12 @@ export default class AppContainer extends preact.Component {
                 <ChatInput app={app} />
             </div>
 
-            <WinsContainer app={app}/>
-
             <div
                 className="k-board-container"
                 ref={el => app.board_container = el}>
             </div>
+
+            <WinsContainer app={app}/>
 
         </div>;
     }

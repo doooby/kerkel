@@ -49,6 +49,7 @@ export default class K3D {
     onContainerSizeChanged () {
         this.setSize();
         this.buildCamera();
+        if (this.session) this.rotateForPlayer(this.session.local_player_i);
         this.render();
     }
 

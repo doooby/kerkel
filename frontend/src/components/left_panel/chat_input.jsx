@@ -12,7 +12,7 @@ export default class ChatInput extends preact.Component {
 
     render ({app}, {user, text}) {
         return <div
-            className="k-chat-input clearfix">
+            className="k-chat-input">
             <button
                 className="button tiny"
                 style={{color: user && app.utils.color_to_css(user.color)}}

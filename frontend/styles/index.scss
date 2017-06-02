@@ -2,7 +2,7 @@
 @import "variables";
 @import "mixins";
 
-@import "./bootstrap_setup";
+@import "./setup";
 
 // Reset and dependencies
 @import "normalize";
@@ -11,10 +11,10 @@
 // Core CSS
 @import "reboot";
 @import "type";
-@import "images";
-@import "code";
+//@import "images";
+//@import "code";
 @import "grid";
-@import "tables";
+//@import "tables";
 @import "forms";
 @import "buttons";
 

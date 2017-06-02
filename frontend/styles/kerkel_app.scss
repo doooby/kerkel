@@ -4,17 +4,9 @@ $k-panel-contrast-color: #ffffff;
 $k-panel-margin: 5;
 
 $k-menu-height: 30;
-$k-users-list-height:100;
-$k-messages-list: 250;
 $k-chat-input-height: 20;
-$k-app-height: $k-menu-height + $k-users-list-height + $k-messages-list + $k-chat-input-height + 5*$k-panel-margin;
-
-$k-left-panel-width: 140;
-
-
-$global-margin: 0.31rem;
-$button-padding: 0.3em 0.3em;
-$button-background: $k-panel-bg2-color;
+$k-app-height: $k-menu-height + 400 + $k-chat-input-height;
+$k-left-panel-width: 200;
 
 html {
   height: 100%;
@@ -34,14 +26,40 @@ body.full-height {
   flex: 1 1;
   height: 100%;
 
-
   display: flex;
   align-items: center;
   justify-content: center;
 
   .k-app-container {
     height: rem-calc($k-app-height);
+    width: rem-calc($k-left-panel-width + 3*$k-panel-margin + 450);
+    display: flex;
+    align-items: stretch;
   }
+
+  .k-left-panel {
+    flex: 0 0 rem-calc($k-left-panel-width);
+    max-width: rem-calc($k-left-panel-width);
+    margin-right: rem-calc($k-panel-margin);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    > div {
+      margin-bottom: rem-calc($k-panel-margin);
+      &:last-child { margin-bottom: 0; }
+    }
+  }
+
+  .k-board-container {
+    flex: 1 1;
+  }
+
+  .k-wins-container {
+    position: relative;
+    flex: 0 0 0;
+  }
+
+  // -----------------------------------------
 
   .k-panel {
     box-shadow: inset 0 0 #{$k-panel-margin}px $k-panel-contrast-color;
@@ -86,42 +104,42 @@ body.full-height {
     }
   }
 
+  .button {
+    @extend .btn;
+    line-height: 1;
+    @include button-size(rem-calc($k-panel-margin), rem-calc($k-panel-margin), $font-size-base, 0);
+    background-color: $k-panel-bg2-color;
+    color: $k-panel-contrast-color;
 
-  .k-left-panel {
-    float: left;
-    width: rem-calc($k-left-panel-width);
-    padding-right: rem-calc($k-panel-margin);
-  }
+    &:hover {
+      cursor: pointer;
+      background-color: #5c5c5c;
+    }
 
-  .k-wins-container {
-    position: relative;
-    width: 100%;
-    height: 0;
-  }
+    &:active,
+    &.active {
+      background-image: none;
+      @include box-shadow(none);
+    }
 
-  .k-board-container {
-    height: 100%;
-    margin-left: rem-calc($k-left-panel-width);
-    min-width: rem-calc(300);
+    &.tiny { font-size: $font-size-xs; }
   }
 
   // -----------------------------------------
 
   .k-menu {
-    height: rem-calc($k-menu-height);
+    flex: 0 0 rem-calc($k-menu-height);
+    display: flex;
+    align-items: stretch;
     > button {
-      $_width: ($k-left-panel-width - 2*$k-panel-margin) / 3;
-      width: rem-calc($_width - 2);
-      height: rem-calc($k-menu-height);
+      flex: 1 1;
       margin-right: rem-calc($k-panel-margin);
       &:last-of-type{ margin-right: 0; }
     }
-    margin-bottom: rem-calc($k-panel-margin);
   }
 
   .k-users-list {
-    height: rem-calc($k-users-list-height);
-    margin-bottom: rem-calc($k-panel-margin);
+    flex: 2 2;
     word-wrap: break-word;
     overflow-y: auto;
     background-color: $k-panel-bg2-color;
@@ -143,10 +161,9 @@ body.full-height {
   }
 
   .k-messages-list {
-    height: rem-calc($k-messages-list);
+    flex: 5 5;
     overflow-y: auto;
     background-color: $k-panel-bg2-color;
-    margin-bottom: rem-calc($k-panel-margin);
     color: $k-panel-contrast-color;
     font-size: 75%;
 
@@ -173,31 +190,28 @@ body.full-height {
   }
 
   .k-chat-input {
-    line-height: rem-calc($k-chat-input-height);
-    $_btn_width: $k-chat-input-height;
+    flex: 0 0 rem-calc($k-chat-input-height);
+    display: flex;
+    align-items: stretch;
 
     > button {
-      float: left;
       font-weight: bold;
-      width: rem-calc($_btn_width);
-      margin: 0;
-      height: rem-calc($k-chat-input-height);
+      flex: 0 0 rem-calc($k-chat-input-height);
+      padding: rem-calc(3);
     }
 
     > input {
-      font-size: 80%;
+      display: inline-block;
+      flex: 1 1;
+      font-size: $font-size-xs;
       margin: 0;
-      margin-left: rem-calc($_btn_width);
+      min-width: 1px;
       padding: rem-calc(2);
-      width: rem-calc($k-left-panel-width - $_btn_width - $k-panel-margin);
-      height: rem-calc($k-chat-input-height);
       border: none;
-      box-shadow: none;
       background-color: $k-panel-bg2-color;
       color: $k-panel-contrast-color;
       &:focus {
         border: none;
-        box-shadow: none;
         background-color: $k-panel-bg2-color;
       }
     }
