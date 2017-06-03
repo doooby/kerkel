@@ -15,6 +15,10 @@ const app_utils = {
         return color;
     },
 
+    random_number (size) {
+        return Math.floor(Math.random()*Math.pow(10, size));
+    },
+
     get_url_params (name) {
         let params = location.search.substr(1).split("&").map(str => str.split('='));
         let hit = params.find(param => param[0] === name);

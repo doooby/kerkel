@@ -51,9 +51,10 @@ function ai_script () {
             app.makeContainerResponsive();
             ai_random_game_init(app);
 
-            app.store.logged_user.set({id: String(Math.floor(Math.random()*Math.pow(10,20))), name: 'ondra'});
+            app.store.logged_user.set({id: String(app_utils.random_number(20)), name: 'ondra'});
         }
     });
+    window.app = app;
 
     preact.render(<AppContainer app={app} />, document.getElementById('kerkel-app'));
 }
@@ -78,7 +79,7 @@ function many_boards_script () {
                 app.k3d.initSession();
             }
             let user = {
-                id: String(Math.floor(Math.random()*Math.pow(10,20))),
+                id: String(app_utils.random_number(20)),
                 name: names[i]
             };
             app.store.logged_user.set(user);

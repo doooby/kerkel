@@ -20,26 +20,52 @@ export default class User {
         this._on_status_changed.push(callback);
     }
 
-    subscribeToActionCable () {
-        window.ondra = this;
-
+    subscribeToWs () {
         const ws = new WebSocket('ws://'+window.location.host+'/ws');
 
-        ws.onopen = function () {
-            console.log('connected');
-            ws.send(Date.now());
+        const pinger = function () {
+            ws.send(JSON.stringify({'$': 'ping', d: Date.now()}));
         };
 
-        ws.onclose = function () {
+        ws.onopen = () => {
+            // pinger();
+            // this.pinger_interval = setInterval(pinger, 10000);
+            ws.send(JSON.stringify({
+                '$': 'sys',
+                't': 'in',
+                user: {id: this.id, name: this.name}
+            }));
+        };
+
+        ws.onclose = () => {
+            // if (this.pinger_interval) {
+            //     clearInterval(this.pinger_interval);
+            //     this.pinger_interval = null;
+            // }
             console.log('disconnected');
         };
 
-        ws.onmessage = function (message) {
-            console.log(`Roundtrip time: ${Date.now() - message.data} ms`);
+        ws.onmessage = e => {
+            let data = null;
+            try { data = JSON.parse(e.data); } catch (e) {}
+            if (data === null) return;
 
-            setTimeout(function timeout() {
-                ws.send(Date.now());
-            }, 2000);
+            switch (data['$']) {
+                case 'pong':
+                    const ping = (Date.now() - data.d);
+                    console.log(`ping-pong: ${ping} ms`);
+                    break;
+
+                default:
+                    this.onMessage(data);
+                    break;
+            }
+
+            // console.log(`Roundtrip time: ${Date.now() - message.data} ms`);
+
+            // setTimeout(function timeout() {
+            //     ws.send(Date.now());
+            // }, 2000);
         };
 
         ws.onerror = function (error) {
@@ -62,10 +88,10 @@ export default class User {
         // this.req_resp_layer = new ReqRespLayer(this.appSubscription);
     }
 
-    unsubscribeFromActionCable () {
-        console.log('unsubscribeFromActionCable');
-        // if (this.cable) {
-        //     this.cable.disconnect();
+    unsubscribeFromWs () {
+        // if (this.pinger_interval) {
+        //     clearInterval(this.pinger_interval);
+        //     this.pinger_interval = null;
         // }
     }
 
@@ -81,18 +107,27 @@ export default class User {
     }
 
     onMessage (data) {
-        if (data.users) {
-            users_changed(this.app.store.present_users, data.users);
-
-        } else if (data.chat && this.onChatMessage) {
-            let person = this.app.store.present_users.all()
-                .find(u => u.id === data.chat.speak);
-            if (person) this.onChatMessage({person, message: data.chat.msg});
-
-        } else if (data.game) {
-            this.app.onGameMessage(data);
+        console.log(data);
+        switch(data['t']) {
+            case 'present_users':
+                users_changed(this.app.store.present_users, data.users);
+                break;
 
         }
+
+
+        // if (data.users) {
+        //     users_changed(this.app.store.present_users, data.users);
+        //
+        // } else if (data.chat && this.onChatMessage) {
+        //     let person = this.app.store.present_users.all()
+        //         .find(u => u.id === data.chat.speak);
+        //     if (person) this.onChatMessage({person, message: data.chat.msg});
+        //
+        // } else if (data.game) {
+        //     this.app.onGameMessage(data);
+        //
+        // }
     }
 }
 
@@ -126,7 +161,7 @@ User.post_logout = function (clbk) {
 };
 
 function users_changed (users_store, users_data) {
-    let real_list = users_data.list.map(arr => ({id: arr[1], name: arr[0]}));
+    let real_list = users_data.map(arr => ({id: arr[0], name: arr[1]}));
 
     // mark all present users either "still-present" or "in-available"
     users_store.all().forEach(user => {
@@ -196,7 +231,7 @@ class Request {
         this.waiter = waiter;
         this.req_data = data;
 
-        this.req_id = Math.floor(Math.random() * Math.pow(10, 10));
+        this.req_id = app_utils.random_number(10);
         data.req_id = this.req_id;
     }
 

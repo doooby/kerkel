@@ -14,19 +14,19 @@ export default class App {
         const store = create_store({
             logged_user: ['value', {
                 set (user_data) {
-                    if (this._value) this._value.unsubscribeFromActionCable();
+                    if (this._value) this._value.unsubscribeFromWs();
 
                     this._value = new User(user_data);
                     this._value.app = app;
                     this._value.color = app.utils.random_color();
 
                     store.present_users.clear(this._value);
-                    this._value.subscribeToActionCable();
+                    this._value.subscribeToWs();
                     this._changed();
                 },
 
                 unset () {
-                    if (this._value) this._value.unsubscribeFromActionCable();
+                    if (this._value) this._value.unsubscribeFromWs();
 
                     this._value = null;
                     this._changed();
