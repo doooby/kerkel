@@ -21,29 +21,63 @@ export default class User {
     }
 
     subscribeToActionCable () {
-        this.cable = ActionCable.createConsumer(`/cable?user=${this.id}${this.name}`);
-        this.appSubscription = this.cable.subscriptions.create('AppChannel', {
-            received: (data) => {
-                if (data.req_id) this.req_resp_layer.onMessage(data);
-                else this.onMessage(data);
-            }
-        });
-        this.req_resp_layer = new ReqRespLayer(this.appSubscription);
+        window.ondra = this;
+
+        const ws = new WebSocket('ws://'+window.location.host+'/ws');
+
+        ws.onopen = function () {
+            console.log('connected');
+            ws.send(Date.now());
+        };
+
+        ws.onclose = function () {
+            console.log('disconnected');
+        };
+
+        ws.onmessage = function (message) {
+            console.log(`Roundtrip time: ${Date.now() - message.data} ms`);
+
+            setTimeout(function timeout() {
+                ws.send(Date.now());
+            }, 2000);
+        };
+
+        ws.onerror = function (error) {
+            console.log(error);
+        };
+
+        this.ws = ws;
+
+
+
+
+
+        // this.cable = ActionCable.createConsumer(`/cable?user=${this.id}${this.name}`);
+        // this.appSubscription = this.cable.subscriptions.create('AppChannel', {
+        //     received: (data) => {
+        //         if (data.req_id) this.req_resp_layer.onMessage(data);
+        //         else this.onMessage(data);
+        //     }
+        // });
+        // this.req_resp_layer = new ReqRespLayer(this.appSubscription);
     }
 
     unsubscribeFromActionCable () {
-        if (this.cable) {
-            this.cable.disconnect();
-        }
+        console.log('unsubscribeFromActionCable');
+        // if (this.cable) {
+        //     this.cable.disconnect();
+        // }
     }
 
     speak (message) {
-        this.appSubscription.perform('speak', {msg: message});
+        console.log('user.speak', message);
+        // this.appSubscription.perform('speak', {msg: message});
     }
 
     sendMessageTo (user_id, data) {
         data.to = user_id;
-        this.appSubscription.perform('send_to', data);
+        console.log('user.sendMessageTo', data);
+        // this.appSubscription.perform('send_to', data);
     }
 
     onMessage (data) {

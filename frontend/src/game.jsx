@@ -82,36 +82,37 @@ export default class Game {
         const winner = this.players[player_i];
         const local_is_winner = winner === this.local_user;
 
-        this.local_user.req_resp_layer.request('finish',
-            {game: this.game_id, winner: winner.id},
-            (req) => {
-                if (req.fail) {
-                    this.app.store.game.discard();
-                    this.app.printAppMessage('game result not accepted by server');
-                    return;
-                }
-
-                this.app.store.right_win.set([{app: this.app}, <div>
-                    <div>{
-                        local_is_winner ?
-                            'You have won!' :
-                            `${winner.name} has won!`
-                    }</div>
-                    <button className="button"
-                            onClick={() => {
-                                this.app.store.game.discard();
-                            }}>
-                        Finish
-                    </button>
-                </div>]);
-
-                this.app.printAppMessage(
-                    local_is_winner ?
-                        `You have won over ${this.opponent.name}` :
-                        `You have lost to ${this.opponent.name}`
-                );
-            }
-        );
+        console.log('game.onPlayerWon', player_i);
+        // this.local_user.req_resp_layer.request('finish',
+        //     {game: this.game_id, winner: winner.id},
+        //     (req) => {
+        //         if (req.fail) {
+        //             this.app.store.game.discard();
+        //             this.app.printAppMessage('game result not accepted by server');
+        //             return;
+        //         }
+        //
+        //         this.app.store.right_win.set([{app: this.app}, <div>
+        //             <div>{
+        //                 local_is_winner ?
+        //                     'You have won!' :
+        //                     `${winner.name} has won!`
+        //             }</div>
+        //             <button className="button"
+        //                     onClick={() => {
+        //                         this.app.store.game.discard();
+        //                     }}>
+        //                 Finish
+        //             </button>
+        //         </div>]);
+        //
+        //         this.app.printAppMessage(
+        //             local_is_winner ?
+        //                 `You have won over ${this.opponent.name}` :
+        //                 `You have lost to ${this.opponent.name}`
+        //         );
+        //     }
+        // );
     }
 
     onMessage (message, data) {

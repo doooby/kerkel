@@ -38,13 +38,13 @@ export default class LoginForm extends preact.Component {
             return;
         }
 
-        User.post_login(this.state.name, (data) => {
-            if (data.user) {
-                this.props.app.store.left_win.close();
-                this.props.app.store.logged_user.set(data.user);
-            }
-            else if (data.reason) this.setState({callout_text: data.reason});
-        });
+        // User.post_login(this.state.name, (data) => {
+        //     if (data.user) {
+        //         this.props.app.store.left_win.close();
+        //         this.props.app.store.logged_user.set(data.user);
+        //     }
+        //     else if (data.reason) this.setState({callout_text: data.reason});
+        // });
     }
 
 }

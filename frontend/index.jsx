@@ -50,6 +50,8 @@ function ai_script () {
             app.k3d = new K3D(app.board_container);
             app.makeContainerResponsive();
             ai_random_game_init(app);
+
+            app.store.logged_user.set({id: String(Math.floor(Math.random()*Math.pow(10,20))), name: 'ondra'});
         }
     });
 

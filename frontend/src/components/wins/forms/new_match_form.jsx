@@ -31,14 +31,16 @@ export default class NewMatchForm extends preact.Component {
         this.setState({callout_text: null});
         if (!this.state.opponent) return;
         let opponent = this.state.opponent, app = this.props.app;
-        app.store('logged_user').req_resp_layer.request('invite', {opponent}, (req) => {
-            if (req.fail) this.setState({callout_text: `fail: ${req.fail}`});
-            else {
-                app.store.left_win.close();
-                opponent = app.store.present_users.find(u => u.id === opponent);
-                if (opponent) app.commenceGame(req.resp_data.game, opponent, true);
-            }
-        });
+
+        console.log('new_match_form.onSubmit');
+        // app.store('logged_user').req_resp_layer.request('invite', {opponent}, (req) => {
+        //     if (req.fail) this.setState({callout_text: `fail: ${req.fail}`});
+        //     else {
+        //         app.store.left_win.close();
+        //         opponent = app.store.present_users.find(u => u.id === opponent);
+        //         if (opponent) app.commenceGame(req.resp_data.game, opponent, true);
+        //     }
+        // });
 
     }
 }
