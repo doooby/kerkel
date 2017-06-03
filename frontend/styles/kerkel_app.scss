@@ -1,12 +1,15 @@
 $k-panel-bg-color: #000000;
 $k-panel-bg2-color: #777777;
-$k-panel-contrast-color: #ffffff;
+$k-panel-contrast-color: #f5f2f2;
 $k-panel-margin: 5;
 
-$k-menu-height: 30;
+$k-menu-height: 40;
 $k-chat-input-height: 20;
 $k-app-height: $k-menu-height + 400 + $k-chat-input-height;
 $k-left-panel-width: 200;
+
+@import url('https://fonts.googleapis.com/css?family=Roboto');
+$k-font: Roboto, sans-serif;
 
 html {
   height: 100%;
@@ -29,6 +32,15 @@ body.full-height {
   display: flex;
   align-items: center;
   justify-content: center;
+
+  font-family: $k-font;
+  button,
+  input,
+  optgroup,
+  select,
+  textarea {
+    font-family: $k-font;
+  }
 
   .k-app-container {
     height: rem-calc($k-app-height);
@@ -110,6 +122,7 @@ body.full-height {
     @include button-size(rem-calc($k-panel-margin), rem-calc($k-panel-margin), $font-size-base, 0);
     background-color: $k-panel-bg2-color;
     color: $k-panel-contrast-color;
+    border-color: $k-panel-contrast-color;
 
     &:hover {
       cursor: pointer;
@@ -129,6 +142,7 @@ body.full-height {
 
   .k-menu {
     flex: 0 0 rem-calc($k-menu-height);
+    max-height: rem-calc($k-menu-height);
     display: flex;
     align-items: stretch;
     > button {
@@ -191,6 +205,7 @@ body.full-height {
 
   .k-chat-input {
     flex: 0 0 rem-calc($k-chat-input-height);
+    max-height: rem-calc($k-chat-input-height);
     display: flex;
     align-items: stretch;
 
@@ -208,10 +223,12 @@ body.full-height {
       min-width: 1px;
       padding: rem-calc(2);
       border: none;
+      outline: none;
       background-color: $k-panel-bg2-color;
       color: $k-panel-contrast-color;
       &:focus {
         border: none;
+        outline: none;
         background-color: $k-panel-bg2-color;
       }
     }

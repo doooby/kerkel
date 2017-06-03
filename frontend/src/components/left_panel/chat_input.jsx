@@ -11,11 +11,17 @@ export default class ChatInput extends preact.Component {
     }
 
     render ({app}, {user, text}) {
+        let style = null;
+        if (user) {
+            const color = app.utils.color_to_css(user.color);
+            style = {color: color, borderColor: color};
+        }
+
         return <div
             className="k-chat-input">
             <button
                 className="button tiny"
-                style={{color: user && app.utils.color_to_css(user.color)}}
+                style={style}
                 onClick={this.sendMessage}>
                 &gt;
 
