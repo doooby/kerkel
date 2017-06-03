@@ -1,5 +1,22 @@
 import classnames from 'classnames';
-import goldenColors from 'golden-colors';
+import color_convert from 'color-convert';
+
+function color_generator (step_base, step_dist, step_count_dist, s, l) {
+    let h = Math.floor(359 * Math.random());
+    s = Math.floor(s * 100);
+    l = Math.floor(l * 100);
+
+    return function () {
+        const step = step_base * (1 + (Math.random() * step_dist * 2) - step_dist);
+        const count_dist = 1 + Math.floor(Math.random() * step_count_dist);
+        h += Math.floor(step * count_dist);
+
+        while (h > 360) h -= 360;
+        const rgb = color_convert.hsl.rgb(h, s, l);
+        const color = `${rgb[0].toString(16)}${rgb[1].toString(16)}${rgb[2].toString(16)}`;
+        return parseInt(color, 16);
+    };
+}
 
 const app_utils = {
 
@@ -8,12 +25,7 @@ const app_utils = {
         console.log(`DEBUG ['${attr_name}'] set to`, object);
     },
 
-    random_color () {
-        let color = goldenColors.getHsvGolden(1, 1);
-        color = `${color.r.toString(16)}${color.g.toString(16)}${color.b.toString(16)}`;
-        color = parseInt(color, 16);
-        return color;
-    },
+    next_color:  color_generator(151, 0.1, 2, 0.9, 0.6),
 
     random_number (size) {
         return Math.floor(Math.random()*Math.pow(10, size));

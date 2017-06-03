@@ -23,25 +23,28 @@ export default class User {
     subscribeToWs () {
         const ws = new WebSocket('ws://'+window.location.host+'/ws');
 
-        const pinger = function () {
-            ws.send(JSON.stringify({'$': 'ping', d: Date.now()}));
-        };
+        // const pinger = function () {
+        //     ws.send(JSON.stringify({'$': 'ping', d: Date.now()}));
+        // };
 
         ws.onopen = () => {
             // pinger();
             // this.pinger_interval = setInterval(pinger, 10000);
+
             ws.send(JSON.stringify({
-                '$': 'sys',
-                't': 'in',
+                '$': 'in',
                 user: {id: this.id, name: this.name}
             }));
         };
 
         ws.onclose = () => {
+            if (this.ws === ws) this.ws = null;
+
             // if (this.pinger_interval) {
             //     clearInterval(this.pinger_interval);
             //     this.pinger_interval = null;
             // }
+
             console.log('disconnected');
         };
 
@@ -75,9 +78,6 @@ export default class User {
         this.ws = ws;
 
 
-
-
-
         // this.cable = ActionCable.createConsumer(`/cable?user=${this.id}${this.name}`);
         // this.appSubscription = this.cable.subscriptions.create('AppChannel', {
         //     received: (data) => {
@@ -89,15 +89,17 @@ export default class User {
     }
 
     unsubscribeFromWs () {
-        // if (this.pinger_interval) {
-        //     clearInterval(this.pinger_interval);
-        //     this.pinger_interval = null;
-        // }
+        if (this.ws) {
+            this.ws.close();
+            this.ws = null;
+        }
     }
 
     speak (message) {
-        console.log('user.speak', message);
-        // this.appSubscription.perform('speak', {msg: message});
+        if (this.ws) {
+            this.ws.send(JSON.stringify({'$': 'speak', t: message}));
+            if (this.onChatMessage) this.onChatMessage({person: this, message});
+        }
     }
 
     sendMessageTo (user_id, data) {
@@ -107,12 +109,19 @@ export default class User {
     }
 
     onMessage (data) {
-        console.log(data);
-        switch(data['t']) {
+        // console.log(data);
+        switch(data['$']) {
             case 'present_users':
                 users_changed(this.app.store.present_users, data.users);
                 break;
 
+            case 'speak':
+                if (this.onChatMessage) {
+                    const person = this.app.store.present_users.all()
+                        .find(u => u.id === data.u);
+                    if (person) this.onChatMessage({person, message: data.t});
+                }
+                break;
         }
 
 
@@ -182,7 +191,7 @@ function users_changed (users_store, users_data) {
     // add new-comers
     users_store.addFromArray(real_list.map(row => {
         let user = new User(row);
-        user.color = app_utils.random_color();
+        user.color = app_utils.next_color();
         return user;
     }));
 }

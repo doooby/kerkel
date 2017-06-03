@@ -18,7 +18,7 @@ export default class App {
 
                     this._value = new User(user_data);
                     this._value.app = app;
-                    this._value.color = app.utils.random_color();
+                    this._value.color = app.utils.next_color();
 
                     store.present_users.clear(this._value);
                     this._value.subscribeToWs();

@@ -1,6 +1,7 @@
 $k-panel-bg-color: #000000;
 $k-panel-bg2-color: #777777;
-$k-panel-contrast-color: #f5f2f2;
+$k-text-color: #f5f2f2;
+$k-contrast-color: #5c5c5c;
 $k-panel-margin: 5;
 
 $k-menu-height: 40;
@@ -74,7 +75,7 @@ body.full-height {
   // -----------------------------------------
 
   .k-panel {
-    box-shadow: inset 0 0 #{$k-panel-margin}px $k-panel-contrast-color;
+    box-shadow: inset 0 0 #{$k-panel-margin}px $k-text-color;
     padding: rem-calc($k-panel-margin);
     background-color: $k-panel-bg-color;
     line-height: 1;
@@ -84,7 +85,7 @@ body.full-height {
     position: absolute;
     z-index: 10;
     background-color: $k-panel-bg-color;
-    color: $k-panel-contrast-color;
+    color: $k-text-color;
 
     input, select {
       margin-bottom: rem-calc($k-panel-margin);
@@ -100,7 +101,7 @@ body.full-height {
     }
 
     a {
-      color: $k-panel-contrast-color;
+      color: $k-text-color;
     }
 
     > .k-window-close {
@@ -111,7 +112,7 @@ body.full-height {
       border: 2px solid $k-panel-bg2-color;
       &:hover {
         color: $k-panel-bg-color;
-        background-color: $k-panel-contrast-color;
+        background-color: $k-text-color;
       }
     }
   }
@@ -121,12 +122,12 @@ body.full-height {
     line-height: 1;
     @include button-size(rem-calc($k-panel-margin), rem-calc($k-panel-margin), $font-size-base, 0);
     background-color: $k-panel-bg2-color;
-    color: $k-panel-contrast-color;
-    border-color: $k-panel-contrast-color;
+    color: $k-text-color;
+    border-color: $k-text-color;
 
     &:hover {
       cursor: pointer;
-      background-color: #5c5c5c;
+      background-color: $k-contrast-color;
     }
 
     &:active,
@@ -159,7 +160,7 @@ body.full-height {
     background-color: $k-panel-bg2-color;
 
     .k-user {
-      border-top: 1px solid $k-panel-bg-color;
+      border-top: 1px solid $k-contrast-color;
       &:first-of-type { border-top: none; }
 
       font-size: 80%;
@@ -167,9 +168,11 @@ body.full-height {
       padding: rem-calc(3 0 3 0);
 
       ._status {
+        width: rem-calc(10);
+        display: inline-block;
         margin: rem-calc(0 5);
-        background-color: #a8a864;
-        &._online { background-color: #7ca511; }
+        background-color: $k-contrast-color;
+        &._online { background-color: $k-text-color; }
       }
     }
   }
@@ -178,7 +181,7 @@ body.full-height {
     flex: 5 5;
     overflow-y: auto;
     background-color: $k-panel-bg2-color;
-    color: $k-panel-contrast-color;
+    color: $k-text-color;
     font-size: 75%;
 
     > div {
@@ -193,7 +196,7 @@ body.full-height {
     &._not_connected {
       position: relative;
       text-align: center;
-      color: $k-panel-contrast-color;
+      color: $k-text-color;
       > span {
         position: absolute;
         top: 50%;
@@ -225,7 +228,7 @@ body.full-height {
       border: none;
       outline: none;
       background-color: $k-panel-bg2-color;
-      color: $k-panel-contrast-color;
+      color: $k-text-color;
       &:focus {
         border: none;
         outline: none;
