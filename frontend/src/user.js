@@ -1,5 +1,7 @@
 import app_utils from './app_utils';
 
+import actions from './ui/actions';
+
 export default class User {
 
     constructor ({id, name}) {
@@ -98,7 +100,7 @@ export default class User {
     speak (message) {
         if (this.ws) {
             this.ws.send(JSON.stringify({'$': 'speak', t: message}));
-            if (this.onChatMessage) this.onChatMessage({person: this, message});
+            app.redux_store.dispatch(actions.addUserMessage(message, this));
         }
     }
 
@@ -116,11 +118,9 @@ export default class User {
                 break;
 
             case 'speak':
-                if (this.onChatMessage) {
-                    const person = this.app.store.present_users.all()
-                        .find(u => u.id === data.u);
-                    if (person) this.onChatMessage({person, message: data.t});
-                }
+                const person = this.app.store.present_users.all()
+                    .find(u => u.id === data.u);
+                if (person) this.app.redux_store.dispatch(actions.addUserMessage(data.t, person));
                 break;
         }
 

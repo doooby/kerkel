@@ -1,8 +1,12 @@
 import User from './user';
 import Game from './game';
 
+import { createStore } from 'redux';
+import kerkelApp from './ui/reducers';
+
 import create_store from './store';
 import app_utils from './app_utils';
+import actions from './ui/actions';
 
 export default class App {
 
@@ -72,6 +76,8 @@ export default class App {
             right_win: ['value']
         });
         this.store = store;
+
+        this.redux_store = createStore(kerkelApp);
     }
 
     logoutUser () {
@@ -121,7 +127,7 @@ export default class App {
     }
 
     printAppMessage (message) {
-        if (this.__appMessage) this.__appMessage(message);
+        this.redux_store.dispatch(actions.addSystemMessage(message));
     }
 
     makeContainerResponsive () {
