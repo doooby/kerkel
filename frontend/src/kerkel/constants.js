@@ -14,7 +14,7 @@ constants.STONE_SIZE = constants.P_SIZE / 6;
 constants.STONE_COLORS = [
     0xff5700,
     0x004de9,
-    0xffffff
+    0x303030
 ];
 
 export default constants;

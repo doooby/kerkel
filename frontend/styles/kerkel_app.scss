@@ -1,7 +1,7 @@
 $k-panel-bg-color: #000000;
-$k-panel-bg2-color: #777777;
+$k-panel-bg2-color: #303030;
 $k-text-color: #f5f2f2;
-$k-contrast-color: #5c5c5c;
+$k-contrast-color: #777777;
 $k-panel-margin: 5;
 
 $k-menu-height: 40;
@@ -109,10 +109,11 @@ body.full-height {
       top: rem-calc(0);
       right: rem-calc(0);
       background-color: $k-panel-bg-color;
-      border: 2px solid $k-panel-bg2-color;
+      border: 2px solid $k-contrast-color;
+      color: $k-contrast-color;
       &:hover {
         color: $k-panel-bg-color;
-        background-color: $k-text-color;
+        background-color: $k-contrast-color;
       }
     }
   }
