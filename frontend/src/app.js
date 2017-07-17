@@ -16,46 +16,6 @@ export default class App {
         const app = this;
 
         const store = create_store({
-            logged_user: ['value', {
-                set (user_data) {
-                    if (this._value) this._value.unsubscribeFromWs();
-
-                    this._value = new User(user_data);
-                    this._value.app = app;
-                    this._value.color = app.utils.next_color();
-
-                    store.present_users.clear(this._value);
-                    this._value.subscribeToWs();
-                    this._changed();
-                },
-
-                unset () {
-                    if (this._value) this._value.unsubscribeFromWs();
-
-                    this._value = null;
-                    this._changed();
-
-                    store.left_win.close();
-                    store.present_users.clear();
-                    store.game.discard();
-                }
-            }],
-
-            present_users: ['list', {
-                allOthers () {
-                    let logged_user = store('logged_user');
-                    let all = this.all();
-                    return logged_user ?
-                        all.filter(u => u.id !== logged_user.id) :
-                        all;
-                },
-
-                clear (user) {
-                    this._list.clear();
-                    if (user) this._list.add(user);
-                    this._changed();
-                }
-            }],
 
             left_win: ['value', {
                 close () {
@@ -70,6 +30,33 @@ export default class App {
                     if (this._value) this._value.onDiscard();
                     app.k3d.initSession();
                     this.set(null);
+                }
+            }],
+
+            logged_user: ['value', {
+                set (user_data) {
+                    console.log('user set');
+                    if (this._value) this._value.unsubscribeFromWs();
+
+                    this._value = new User(user_data);
+                    this._value.app = app;
+                    this._value.color = app.utils.next_color();
+
+                    app.redux_store.dispatch(actions.usersListChanged([]));
+                    this._value.subscribeToWs();
+                    this._changed();
+                },
+
+                unset () {
+                    if (this._value) this._value.unsubscribeFromWs();
+
+                    this._value = null;
+                    app.redux_store.dispatch(actions.usersListChanged([]));
+                    this._changed();
+
+                    store.left_win.close();
+                    store.game.discard();
+
                 }
             }],
 
@@ -109,7 +96,7 @@ export default class App {
 
         } else {
             if (message === 'invitation' && from) {
-                const challenger = this.store.present_users.find(u => u.id === from);
+                const challenger = this.getUser(from);
                 if (challenger) {
                     this.printAppMessage(`invitation from ${challenger.name}`);
                     this.commenceGame(data.game, challenger, false);
@@ -136,6 +123,16 @@ export default class App {
             600
         );
         window.addEventListener('resize', this.makeContainerResponsive._callback);
+    }
+
+    getUser (id) {
+        return Array.from(this.redux_store.getState().present_users2).find(u => u.id === id);
+    }
+
+    getAllOtherUsersList () {
+        const all = Array.from(this.redux_store.getState().present_users2);
+        const current = this.store('logged_user');
+        return current ? all.filter(u => u.id !== current.id) : all;
     }
 
 }

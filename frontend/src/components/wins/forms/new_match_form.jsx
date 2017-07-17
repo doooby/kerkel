@@ -9,13 +9,12 @@ export default class NewMatchForm extends preact.Component {
         this.onSubmit = this.onSubmit.bind(this);
     }
 
-    render ({app}, {opponent, callout_text}) {
+    render ({app, users}, {opponent, callout_text}) {
         return <form action="javascript:" method="post" onSubmit={this.onSubmit}>
             <select
                 value={opponent}
                 onChange={this.onOpponentSelected}>
-                {app.store.present_users.allOthers().filter(u => u.status)
-                    .map(u => <option value={u.id}>{u.name}</option>)
+                {users.map(u => <option value={u.id}>{u.name}</option>)
                 }
             </select>
             <input type="submit" value="invite opponent" className="button" />

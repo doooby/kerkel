@@ -7,6 +7,10 @@ const actions = {
 
     addSystemMessage: function (message) {
         return {type: 'ADD_MESSAGE', item: {message, person: system_person}};
+    },
+
+    usersListChanged: function (list) {
+        return {type: 'PRESENT_USERS_CHANGE', list: list};
     }
 
 };

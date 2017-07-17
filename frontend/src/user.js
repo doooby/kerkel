@@ -5,7 +5,7 @@ import actions from './ui/actions';
 export default class User {
 
     constructor ({id, name}) {
-        this.id = id;
+        this.id = Number(id);
         this.name = name;
         this.status = true;
 
@@ -15,6 +15,10 @@ export default class User {
         this['changed'] = () => {
             this._on_status_changed.forEach(clbk => clbk(this));
         }
+    }
+
+    assignNewColor () {
+        this.color = app_utils.next_color();
     }
 
     onStatusChanged (callback) {
@@ -114,29 +118,16 @@ export default class User {
         // console.log(data);
         switch(data['$']) {
             case 'present_users':
-                users_changed(this.app.store.present_users, data.users);
+                const users_list = data.users.map(arr => ({id: arr[0], name: arr[1]}));
+                this.app.redux_store.dispatch(actions.usersListChanged(users_list));
                 break;
 
             case 'speak':
-                const person = this.app.store.present_users.all()
-                    .find(u => u.id === data.u);
+                const person = this.app.getUser(data.u);
                 if (person) this.app.redux_store.dispatch(actions.addUserMessage(data.t, person));
                 break;
         }
 
-
-        // if (data.users) {
-        //     users_changed(this.app.store.present_users, data.users);
-        //
-        // } else if (data.chat && this.onChatMessage) {
-        //     let person = this.app.store.present_users.all()
-        //         .find(u => u.id === data.chat.speak);
-        //     if (person) this.onChatMessage({person, message: data.chat.msg});
-        //
-        // } else if (data.game) {
-        //     this.app.onGameMessage(data);
-        //
-        // }
     }
 }
 
@@ -168,33 +159,6 @@ User.post_logout = function (clbk) {
     })
         .then(clbk);
 };
-
-function users_changed (users_store, users_data) {
-    let real_list = users_data.map(arr => ({id: arr[0], name: arr[1]}));
-
-    // mark all present users either "still-present" or "in-available"
-    users_store.all().forEach(user => {
-        let real_list_row = real_list.find(row => row.id === user.id);
-        if (real_list_row) {
-            let i = real_list.indexOf(real_list_row);
-            real_list.splice(i, 1);
-        }
-
-        user.status = !!real_list_row;
-
-        if (!user.status) {
-            user.changed();
-            // set timer to clear him out
-        }
-    });
-
-    // add new-comers
-    users_store.addFromArray(real_list.map(row => {
-        let user = new User(row);
-        user.color = app_utils.next_color();
-        return user;
-    }));
-}
 
 class ReqRespLayer {
 

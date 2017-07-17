@@ -56,12 +56,14 @@ export default class Menu extends preact.Component {
     }
 
     toggleMatchWin () {
+        const {app} = this.props;
+
         if (this.closeOpenedWindow() === 'game') return;
-        if (this.props.app.store('logged_user') === null) return;
-        if (this.props.app.k3d.session === null) return;
+        if (app.store('logged_user') === null) return;
+        if (app.k3d.session === null) return;
 
         let children;
-        const game = this.props.app.store('game');
+        const game = app.store('game');
 
         if (game) {
             children = [
@@ -78,7 +80,8 @@ export default class Menu extends preact.Component {
 
         } else {
             children = [
-                <NewMatchForm app={this.props.app}/>
+                <NewMatchForm app={app}
+                              users={app.getAllOtherUsersList()}/>
             ];
 
         }
