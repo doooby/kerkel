@@ -9,7 +9,7 @@ export default class LoginForm extends preact.Component {
         this.onNameChanged = this.onNameChanged.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
 
-        let user = props.app.store('logged_user');
+        let user = props.app.redux_store.getState().logged_user;
         if (user) this.state.name = user.name;
     }
 
@@ -37,6 +37,8 @@ export default class LoginForm extends preact.Component {
             this.setState({callout_text: 'login disallowed for this mode'});
             return;
         }
+
+        throw 'login';
 
         // User.post_login(this.state.name, (data) => {
         //     if (data.user) {

@@ -5,7 +5,7 @@ export default class Game {
     constructor (app, game_id, opponent) {
         this.app = app;
         this.game_id = game_id;
-        this.local_user = this.app.store('logged_user');
+        this.local_user = this.app.redux_store.getState().logged_user;
         this.opponent = opponent;
     }
 

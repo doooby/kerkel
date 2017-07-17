@@ -19,9 +19,9 @@ export default class UsersList extends preact.Component {
 
         this.store_unsibscribe = app.redux_store.subscribe(() => {
             const state = app.redux_store.getState();
-            if (users_was !== state.present_users2) {
-                users_was = state.present_users2;
-                this.setState({users: app.getAllOtherUsersList()});
+            if (users_was !== state.present_users) {
+                users_was = state.present_users;
+                this.setState({users: app.getAllOtherUsersList(state)});
             }
         });
     }

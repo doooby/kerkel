@@ -1,7 +1,9 @@
 import User from '../../user';
+import actions from '../actions'
 
 const init_state = {
-    present_users2: new Set(),
+    logged_user: null,
+    present_users: new Set(),
     chat_messages: []
 };
 
@@ -9,6 +11,26 @@ function kerkelApp (state, action) {
     if (state === undefined) { return init_state; }
 
     switch (action.type) {
+        case 'SET_USER':
+            const user = action.user;
+            const changes = {
+                logged_user: user,
+                present_users: new Set()
+            };
+
+            if (state.logged_user) state.logged_user.unsubscribeFromWs();
+            if (user) {
+                user.subscribeToWs();
+
+                changes.chat_messages = [
+                    ...state.chat_messages,
+                    actions.addSystemMessage(`logged in as ${user.name}`).item
+                ];
+            }
+
+            return Object.assign({}, state, changes);
+            break;
+
         case 'ADD_MESSAGE':
             return Object.assign({}, state, {
                 chat_messages: [...state.chat_messages, action.item]
@@ -16,8 +38,9 @@ function kerkelApp (state, action) {
             break;
 
         case 'PRESENT_USERS_CHANGE':
+            const users = present_users(state.present_users, action.list, state.logged_user);
             return Object.assign({}, state, {
-                present_users2: present_users2(state.present_users2, action.list, state.logged_user)
+                present_users: users
             });
             break;
 
@@ -28,7 +51,7 @@ function kerkelApp (state, action) {
     }
 }
 
-function present_users2 (orig_set, new_list, logged_user) {
+function present_users (orig_set, new_list, logged_user) {
     const new_set = new Set(orig_set);
     const former_array = Array.from(new_set);
     const former_ids = former_array.map(u => u.id);

@@ -50,14 +50,21 @@ export default class ChatInput extends preact.Component {
     }
 
     componentDidMount () {
-        this.__user_clear = this.props.app.store('logged_user', (store) => {
-            this.setState({user: store.get(), text: null});
-        });
+        const {app} = this.props;
 
+        this.store_unsibscribe = app.redux_store.subscribe(() => {
+            const state = app.redux_store.getState();
+
+            if (state.logged_user !== this.state.user)
+                this.setState({
+                    user: state.logged_user,
+                    text: null
+                });
+        });
     }
 
     componentWillUnmount () {
-        this.__user_clear();
+        this.store_unsibscribe();
     }
 
 }

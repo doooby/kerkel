@@ -13,8 +13,13 @@ export default class App {
     constructor (on_mounted) {
         this.utils = app_utils;
         this.onMounted = on_mounted.bind(this);
-        const app = this;
+        this.redux_store = createStore(kerkelApp);
 
+        this.redux_store.subscribe(() => {
+            console.log(this.redux_store.getState());
+        });
+
+        const app = this;
         const store = create_store({
 
             left_win: ['value', {
@@ -33,50 +38,22 @@ export default class App {
                 }
             }],
 
-            logged_user: ['value', {
-                set (user_data) {
-                    console.log('user set');
-                    if (this._value) this._value.unsubscribeFromWs();
-
-                    this._value = new User(user_data);
-                    this._value.app = app;
-                    this._value.color = app.utils.next_color();
-
-                    app.redux_store.dispatch(actions.usersListChanged([]));
-                    this._value.subscribeToWs();
-                    this._changed();
-                },
-
-                unset () {
-                    if (this._value) this._value.unsubscribeFromWs();
-
-                    this._value = null;
-                    app.redux_store.dispatch(actions.usersListChanged([]));
-                    this._changed();
-
-                    store.left_win.close();
-                    store.game.discard();
-
-                }
-            }],
-
             right_win: ['value']
         });
         this.store = store;
-
-        this.redux_store = createStore(kerkelApp);
     }
 
-    logoutUser () {
-        const user = this.store('logged_user');
-        if (user) User.post_logout(() => {
-            this.store.logged_user.unset();
-        });
-    }
+    // logoutUser () {
+    //     const user = this.store('logged_user');
+    //     if (user) User.post_logout(() => {
+    //         this.redux_store.dispatch(actions.unloggUser());
+    //     });
+    // }
 
     onGameMessage (data) {
         const from = data.from;
         const message = data.message;
+        const state = this.redux_store.getState();
         let game = this.store('game');
 
         if (game) {
@@ -85,7 +62,7 @@ export default class App {
 
             else {
                 if (['invitation'].includes(message)) {
-                    this.store('logged_user').sendMessageTo(from, {
+                    state.logged_user.sendMessageTo(from, {
                         game: data.game,
                         message: 'rejection',
                         orig_message: message,
@@ -125,13 +102,17 @@ export default class App {
         window.addEventListener('resize', this.makeContainerResponsive._callback);
     }
 
-    getUser (id) {
-        return Array.from(this.redux_store.getState().present_users2).find(u => u.id === id);
+    getState () {
+        return this.redux_store.getState();
     }
 
-    getAllOtherUsersList () {
-        const all = Array.from(this.redux_store.getState().present_users2);
-        const current = this.store('logged_user');
+    getUser (id, state=this.getState()) {
+        return Array.from(state.present_users).find(u => u.id === id);
+    }
+
+    getAllOtherUsersList (state=this.getState()) {
+        const all = Array.from(state.present_users);
+        const current = state.logged_user;
         return current ? all.filter(u => u.id !== current.id) : all;
     }
 

@@ -22,21 +22,17 @@ export default class MessagesList extends preact.Component {
     }
 
     componentDidMount () {
-        const app = this.props.app;
-
-        this.__user_clear = this.props.app.store('logged_user', (store) => {
-            const user = store.get();
-            const messages = [];
-            this.setState({user: user, messages: messages});
-
-            if (user) {
-                    app.redux_store.dispatch(actions.addSystemMessage(`logged in as ${user.name}`));
-            }
-        });
+        const {app} = this.props;
 
         this.store_unsibscribe = app.redux_store.subscribe(() => {
             const state = app.redux_store.getState();
-            this.setState({messages: state.chat_messages});
+
+            if (state.logged_user !== this.state.logged_user ||
+                state.chat_messages !== this.state.messages)
+                this.setState({
+                    user: state.logged_user,
+                    messages: state.chat_messages
+                });
         });
     }
 
@@ -45,8 +41,6 @@ export default class MessagesList extends preact.Component {
     }
 
     componentWillUnmount () {
-        this.__user_clear();
-
         this.store_unsibscribe();
     }
 

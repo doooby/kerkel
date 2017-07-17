@@ -6,6 +6,7 @@ import User from './src/user';
 import App from './src/app';
 
 import AppContainer from './src/components/app_container';
+import actions from './src/ui/actions';
 
 import app_utils from './src/app_utils';
 
@@ -37,7 +38,9 @@ function default_script () {
             app.makeContainerResponsive();
             app.k3d.initSession();
         }
-        User.get_login(data => { if (data.user) app.store.logged_user.set(data.user); });
+        User.get_login(data => {
+            if (data.user) app.redux_store.dispatch(actions.loggUser(data.user, app));
+        });
     });
 
     preact.render(<AppContainer app={app} />, document.getElementById('kerkel-app'));
@@ -51,7 +54,10 @@ function ai_script () {
             app.makeContainerResponsive();
             ai_random_game_init(app);
 
-            app.store.logged_user.set({id: String(app_utils.random_number(20)), name: 'ondra'});
+            app.redux_store.dispatch(actions.loggUser({
+                id: app_utils.random_number(20),
+                name: 'user'
+            }, app));
         }
     });
     window.app = app;
@@ -78,11 +84,11 @@ function many_boards_script () {
                 app.makeContainerResponsive();
                 app.k3d.initSession();
             }
-            let user = {
-                id: String(app_utils.random_number(20)),
+
+            app.redux_store.dispatch(actions.loggUser({
+                id: app_utils.random_number(20),
                 name: names[i]
-            };
-            app.store.logged_user.set(user);
+            }, app));
         });
         apps.push(app);
         preact.render(<AppContainer app={app} />, container);

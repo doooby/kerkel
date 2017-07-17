@@ -1,3 +1,4 @@
+import User from '../../user';
 
 const actions = {
 
@@ -11,6 +12,17 @@ const actions = {
 
     usersListChanged: function (list) {
         return {type: 'PRESENT_USERS_CHANGE', list: list};
+    },
+
+    loggUser: function (user_data, app) {
+        const user = new User(user_data);
+        user.app = app;
+        user.assignNewColor();
+        return {type: 'SET_USER', user};
+    },
+
+    unloggUser: function () {
+        return {type: 'SET_USER', user: null};
     }
 
 };

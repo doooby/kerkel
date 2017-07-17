@@ -6,9 +6,9 @@ export default class Menu extends preact.Component {
 
     constructor(props) {
         super(props);
-        this.state.window = null;
-        // this.state.user = null;
-        // User.logged_user.subscribe(() => this.setState({user: User.logged_user.get()}));
+        this.state = {
+            window: null
+        };
 
         this.toggleSetNameWin = this.toggleSetNameWin.bind(this);
         this.toggleMatchWin = this.toggleMatchWin.bind(this);
@@ -44,7 +44,8 @@ export default class Menu extends preact.Component {
         if (this.closeOpenedWindow() === 'set_name') return;
 
         let children = [
-            <LoginForm app={this.props.app}/>
+            <LoginForm
+                app={this.props.app}/>
         ];
 
         this.openWindow({
@@ -57,9 +58,10 @@ export default class Menu extends preact.Component {
 
     toggleMatchWin () {
         const {app} = this.props;
+        const state = app.redux_store.getState();
 
         if (this.closeOpenedWindow() === 'game') return;
-        if (app.store('logged_user') === null) return;
+        if (state.logged_user === null) return;
         if (app.k3d.session === null) return;
 
         let children;
@@ -79,9 +81,11 @@ export default class Menu extends preact.Component {
             ];
 
         } else {
+            const present_users = app.getAllOtherUsersList().filter(u => u.status);
             children = [
-                <NewMatchForm app={app}
-                              users={app.getAllOtherUsersList()}/>
+                <NewMatchForm
+                    app={app}
+                    users={present_users}/>
             ];
 
         }
