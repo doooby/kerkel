@@ -2,11 +2,11 @@ import User from './user';
 import Game from './game';
 
 import { createStore } from 'redux';
-import kerkelApp from './ui/reducers';
+import kerkelApp from './reducers';
 
 import create_store from './store';
 import app_utils from './app_utils';
-import actions from './ui/actions';
+import actions from './actions';
 
 export default class App {
 
@@ -21,15 +21,6 @@ export default class App {
 
         const app = this;
         const store = create_store({
-
-            left_win: ['value', {
-                close () {
-                    if (!this._value) return;
-                    let [props, ..._] = this._value;
-                    props.toClose();
-                }
-            }],
-
             game: ['value', {
                 discard () {
                     if (this._value) this._value.onDiscard();

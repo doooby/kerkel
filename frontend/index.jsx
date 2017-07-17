@@ -6,7 +6,7 @@ import User from './src/user';
 import App from './src/app';
 
 import AppContainer from './src/components/app_container';
-import actions from './src/ui/actions';
+import actions from './src/actions';
 
 import app_utils from './src/app_utils';
 

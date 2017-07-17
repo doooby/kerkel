@@ -1,6 +1,6 @@
 import preact from 'preact';
 import User from '../../../user';
-import actions from '../../../ui/actions';
+import actions from '../../../actions';
 
 export default class LoginForm extends preact.Component {
 

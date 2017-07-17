@@ -1,5 +1,4 @@
 import preact from 'preact';
-import actions from '../../ui/actions';
 
 export default class MessagesList extends preact.Component {
 

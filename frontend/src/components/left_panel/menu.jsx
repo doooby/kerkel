@@ -2,7 +2,7 @@ import preact from 'preact';
 import LoginForm from '../wins/forms/login_form';
 import NewMatchForm from '../wins/forms/new_match_form';
 
-import actions from '../../ui/actions';
+import actions from '../../actions';
 
 export default class Menu extends preact.Component {
 

@@ -1,4 +1,4 @@
-import User from '../../user';
+import User from '../user';
 import actions from '../actions'
 
 const init_state = {

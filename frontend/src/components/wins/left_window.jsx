@@ -1,5 +1,5 @@
 import preact from 'preact';
-import actions from '../../ui/actions';
+import actions from '../../actions';
 
 export default class LeftWindow extends preact.Component {
 

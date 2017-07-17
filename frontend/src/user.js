@@ -1,6 +1,6 @@
 import app_utils from './app_utils';
 
-import actions from './ui/actions';
+import actions from './actions';
 
 export default class User {
 
