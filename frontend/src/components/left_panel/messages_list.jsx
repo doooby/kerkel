@@ -3,7 +3,7 @@ import actions from '../../ui/actions';
 
 export default class MessagesList extends preact.Component {
 
-    render ({app}, {user, messages}) {
+    render ({app, user}, {messages}) {
         if (!user) return <div className="k-messages-list _not_connected">
             <span>you must connect<br />to use chat</span>
         </div>;
@@ -27,12 +27,8 @@ export default class MessagesList extends preact.Component {
         this.store_unsibscribe = app.redux_store.subscribe(() => {
             const state = app.redux_store.getState();
 
-            if (state.logged_user !== this.state.logged_user ||
-                state.chat_messages !== this.state.messages)
-                this.setState({
-                    user: state.logged_user,
-                    messages: state.chat_messages
-                });
+            if (state.chat_messages !== this.state.messages)
+                this.setState({messages: state.chat_messages});
         });
     }
 

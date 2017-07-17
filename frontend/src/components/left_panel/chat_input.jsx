@@ -10,7 +10,7 @@ export default class ChatInput extends preact.Component {
         this.sendMessage = this.sendMessage.bind(this);
     }
 
-    render ({app}, {user, text}) {
+    render ({app, user}, {text}) {
         let style = null;
         if (user) {
             const color = app.utils.color_to_css(user.color);
@@ -44,27 +44,9 @@ export default class ChatInput extends preact.Component {
     }
 
     sendMessage () {
-        if (!this.state.text || !this.state.user) return;
-        this.state.user.speak(this.state.text);
+        if (!this.state.text || !this.props.user) return;
+        this.props.user.speak(this.state.text);
         this.setState({text: null});
-    }
-
-    componentDidMount () {
-        const {app} = this.props;
-
-        this.store_unsibscribe = app.redux_store.subscribe(() => {
-            const state = app.redux_store.getState();
-
-            if (state.logged_user !== this.state.user)
-                this.setState({
-                    user: state.logged_user,
-                    text: null
-                });
-        });
-    }
-
-    componentWillUnmount () {
-        this.store_unsibscribe();
     }
 
 }

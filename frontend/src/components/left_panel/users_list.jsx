@@ -15,13 +15,13 @@ export default class UsersList extends preact.Component {
 
     componentDidMount () {
         const {app} = this.props;
-        let users_was = null;
 
+        let users_was = null;
         this.store_unsibscribe = app.redux_store.subscribe(() => {
-            const state = app.redux_store.getState();
-            if (users_was !== state.present_users) {
-                users_was = state.present_users;
-                this.setState({users: app.getAllOtherUsersList(state)});
+            const app_state = app.redux_store.getState();
+            if (users_was !== app_state.present_users) {
+                users_was = app_state.present_users;
+                this.setState({users: app.getAllOtherUsersList(app_state)});
             }
         });
     }

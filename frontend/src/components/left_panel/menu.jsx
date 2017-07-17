@@ -57,11 +57,12 @@ export default class Menu extends preact.Component {
     }
 
     toggleMatchWin () {
-        const {app} = this.props;
-        const state = app.redux_store.getState();
-
         if (this.closeOpenedWindow() === 'game') return;
-        if (state.logged_user === null) return;
+
+        const {app, user} = this.props;
+        if (user === null) return;
+        const app_state = app.redux_store.getState();
+
         if (app.k3d.session === null) return;
 
         let children;

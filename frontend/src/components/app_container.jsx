@@ -8,7 +8,7 @@ import WinsContainer from './wins_container';
 
 export default class AppContainer extends preact.Component {
 
-    render ({app}) {
+    render ({app}, {user}) {
         return <div
             className="k-app-container k-panel"
             ref={el => app.app_container = el}
@@ -16,10 +16,10 @@ export default class AppContainer extends preact.Component {
 
             <div
                 className="k-left-panel">
-                <Menu app={app} />
+                <Menu app={app} user={user}/>
                 <UsersList app={app} />
-                <MessagesList app={app} />
-                <ChatInput app={app} />
+                <MessagesList app={app} user={user}/>
+                <ChatInput app={app} user={user}/>
             </div>
 
             <div
@@ -33,6 +33,17 @@ export default class AppContainer extends preact.Component {
     }
 
     componentDidMount () {
+        const {app} = this.props;
+
+        this.store_unsibscribe = app.redux_store.subscribe(() => {
+            const app_state = app.redux_store.getState();
+            if (app_state.logged_user !== this.state.user)
+                this.setState({user: app_state.logged_user});
+        });
+    }
+
+    componentWillUnmount () {
+        this.store_unsibscribe();
         this.props.app.onMounted();
     }
 
