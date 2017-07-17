@@ -1,0 +1,19 @@
+.btn {
+  &:hover {
+    cursor: pointer;
+  }
+
+
+  &.btn-primary {
+
+    &:hover {
+      background-color: $k-contrast-color;
+    }
+  }
+
+  &.btn-xs {
+    font-size: $font-size-xs;
+  }
+
+}
+

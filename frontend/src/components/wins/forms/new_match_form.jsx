@@ -9,17 +9,30 @@ export default class NewMatchForm extends preact.Component {
         this.onSubmit = this.onSubmit.bind(this);
     }
 
-    render ({app, users}, {opponent, callout_text}) {
-        return <form action="javascript:" method="post" onSubmit={this.onSubmit}>
-            <select
-                value={opponent}
-                onChange={this.onOpponentSelected}>
-                {users.map(u => <option value={u.id}>{u.name}</option>)
-                }
-            </select>
-            <input type="submit" value="invite opponent" className="button" />
-            {callout_text && <div className="callout alert">{callout_text}</div>}
-        </form>;
+    render ({app, users}, {opponent, alert_message}) {
+        return <div>
+            <h4>MATCH</h4>
+
+            <div className="form-group">
+                <select
+                    className="form-control"
+                    value={opponent}
+                    onChange={this.onOpponentSelected}>
+                    {users.map(u => <option value={u.id}>{u.name}</option>)
+                    }
+                </select>
+            </div>
+
+            <div className="form-group">
+                <button
+                    className="btn btn-primary"
+                    onClick={this.onSubmit}>
+                    Send invitation
+                </button>
+            </div>
+
+            {alert_message && <div className="alert alert-danger">{alert_message}</div>}
+        </div>;
     }
 
     onOpponentSelected (e) {
@@ -27,13 +40,15 @@ export default class NewMatchForm extends preact.Component {
     }
 
     onSubmit () {
-        this.setState({callout_text: null});
-        if (!this.state.opponent) return;
-        let opponent = this.state.opponent, app = this.props.app;
+        this.setState({alert_message: null});
 
-        console.log('new_match_form.onSubmit');
+        const {app} = this.props;
+        const {opponent} = this.state;
+        if (!opponent) return;
+
+        console.log('new_match_form.onSubmit', opponent);
         // app.store('logged_user').req_resp_layer.request('invite', {opponent}, (req) => {
-        //     if (req.fail) this.setState({callout_text: `fail: ${req.fail}`});
+        //     if (req.fail) this.setState({alert_message: `fail: ${req.fail}`});
         //     else {
         //         app.store.left_win.close();
         //         opponent = app.store.present_users.find(u => u.id === opponent);

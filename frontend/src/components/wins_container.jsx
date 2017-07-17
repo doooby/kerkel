@@ -13,26 +13,26 @@ export default class WinsContainer extends preact.Component {
 
     render ({app}, {left, right}) {
         return <div className="k-wins-container">
-            {left !== null && preact.h(LeftWindow, ...left)}
-            {right !== null && preact.h(RightWindow, ...right)}
+            {left && preact.h(LeftWindow, left.props, left.children)}
+            {right && preact.h(RightWindow, right.props, right.children)}
         </div>;
     }
 
     componentDidMount () {
-        this.__left_win_clear = this.props.app.store('left_win', (store) => {
-            if (this.state.left !== null) {
-                let [win_props, ..._] = this.state.left;
-                win_props.onClosed();
-            }
-            this.setState({left: store.get()});
-        });
-        this.__right_win_clear = this.props.app.store('right_win', (store) => {
-            this.setState({right: store.get()});
+        const {app} = this.props;
+
+        this.store_unsibscribe = app.redux_store.subscribe(() => {
+            const app_state = app.redux_store.getState();
+            if (app_state.left_win !== this.state.left ||
+                app_state.right_win !== this.state.right)
+                this.setState({
+                    left: app_state.left_win,
+                    right: app_state.right_win
+                });
         });
     }
 
     componentWillUnmount () {
-        this.__left_win_clear();
-        this.__right_win_clear();
+        this.store_unsibscribe();
     }
 }

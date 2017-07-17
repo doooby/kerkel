@@ -1,5 +1,6 @@
 import preact from 'preact';
 import User from '../../../user';
+import actions from '../../../ui/actions';
 
 export default class LoginForm extends preact.Component {
 
@@ -13,16 +14,29 @@ export default class LoginForm extends preact.Component {
         if (user) this.state.name = user.name;
     }
 
-    render (_, {name, callout_text}) {
-        return <form action="javascript:" method="post" onSubmit={this.onSubmit}>
-            <input
-                type="text"
-                placeholder="name"
-                value={name}
-                onChange={this.onNameChanged} />
-            <input type="submit" value="set this name" className="button" />
-            {callout_text && <div className="callout alert">{callout_text}</div>}
-        </form>
+    render (_, {name, alert_message}) {
+        return <div>
+            <h4>LOG-IN</h4>
+
+            <div className="form-group">
+                <input
+                    type="text"
+                    className="form-control"
+                    placeholder="name"
+                    value={name}
+                    onChange={this.onNameChanged} />
+            </div>
+
+            <div className="form-group">
+                <button
+                    className="btn btn-primary"
+                    onClick={this.onSubmit}>
+                    Set
+                </button>
+            </div>
+
+            {alert_message && <div className="alert alert-danger">{alert_message}</div>}
+        </div>
     }
 
     onNameChanged (e) {
@@ -30,23 +44,23 @@ export default class LoginForm extends preact.Component {
     }
 
     onSubmit () {
-        this.setState({callout_text: null});
-        if (!this.state.name) return;
+        const {app} = this.props;
+        const {name} = this.state;
 
-        if (this.props.app.disalowed_login) {
-            this.setState({callout_text: 'login disallowed for this mode'});
+        this.setState({alert_message: null});
+        if (!name) return;
+
+        if (app.disalowed_login) {
+            this.setState({alert_message: 'login disallowed for this mode'});
             return;
         }
 
-        throw 'login';
-
-        // User.post_login(this.state.name, (data) => {
-        //     if (data.user) {
-        //         this.props.app.store.left_win.close();
-        //         this.props.app.store.logged_user.set(data.user);
-        //     }
-        //     else if (data.reason) this.setState({callout_text: data.reason});
-        // });
+        User.post_login(name, (data) => {
+            if (data.user) {
+                app.redux_store.dispatch(actions.loggUser(data.user));
+            }
+            else if (data.reason) this.setState({alert_message: data.reason});
+        });
     }
 
 }

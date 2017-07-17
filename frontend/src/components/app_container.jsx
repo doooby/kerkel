@@ -22,12 +22,14 @@ export default class AppContainer extends preact.Component {
                 <ChatInput app={app} user={user}/>
             </div>
 
-            <div
-                className="k-board-container"
-                ref={el => app.board_container = el}>
-            </div>
+            <div className="k-content">
+                <WinsContainer app={app}/>
 
-            <WinsContainer app={app}/>
+                <div
+                    className="k-board-container"
+                    ref={el => app.board_container = el}>
+                </div>
+            </div>
 
         </div>;
     }
@@ -40,11 +42,12 @@ export default class AppContainer extends preact.Component {
             if (app_state.logged_user !== this.state.user)
                 this.setState({user: app_state.logged_user});
         });
+
+        this.props.app.onMounted();
     }
 
     componentWillUnmount () {
         this.store_unsibscribe();
-        this.props.app.onMounted();
     }
 
 }

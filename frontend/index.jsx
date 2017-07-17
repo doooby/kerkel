@@ -47,6 +47,7 @@ function default_script () {
 }
 
 function ai_script () {
+    console.log('whoa?');
     const app = new App(() => {
         if (app.board_container) {
             app.disalowed_login = true;
@@ -54,6 +55,7 @@ function ai_script () {
             app.makeContainerResponsive();
             ai_random_game_init(app);
 
+            console.log('logging in');
             app.redux_store.dispatch(actions.loggUser({
                 id: app_utils.random_number(20),
                 name: 'user'

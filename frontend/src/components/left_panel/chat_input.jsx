@@ -20,7 +20,7 @@ export default class ChatInput extends preact.Component {
         return <div
             className="k-chat-input">
             <button
-                className="button tiny"
+                className="btn btn-primary btn-xs"
                 style={style}
                 onClick={this.sendMessage}>
                 &gt;

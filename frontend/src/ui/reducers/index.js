@@ -4,7 +4,8 @@ import actions from '../actions'
 const init_state = {
     logged_user: null,
     present_users: new Set(),
-    chat_messages: []
+    chat_messages: [],
+    left_win: null
 };
 
 function kerkelApp (state, action) {
@@ -15,7 +16,8 @@ function kerkelApp (state, action) {
             const user = action.user;
             const changes = {
                 logged_user: user,
-                present_users: new Set()
+                present_users: new Set(),
+                left_win: null
             };
 
             if (state.logged_user) state.logged_user.unsubscribeFromWs();
@@ -41,6 +43,12 @@ function kerkelApp (state, action) {
             const users = present_users(state.present_users, action.list, state.logged_user);
             return Object.assign({}, state, {
                 present_users: users
+            });
+            break;
+
+        case 'SET_LEFT_WIN':
+            return Object.assign({}, state, {
+                left_win: action.win
             });
             break;
 

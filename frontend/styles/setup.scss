@@ -1,4 +1,35 @@
+$k-panel-bg-color: #000000;
+$k-panel-bg2-color: #303030;
+$k-text-color: #f5f2f2;
+$k-contrast-color: #777777;
+$k-panel-margin: 5;
+
+$k-menu-height: 40;
+$k-chat-input-height: 20;
+$k-app-height: $k-menu-height + 400 + $k-chat-input-height;
+$k-left-panel-width: 200;
+
+@import url('https://fonts.googleapis.com/css?family=Roboto');
+$k-font: Roboto, sans-serif;
+
 
 body {
   padding: 15px;
 }
+
+$spacer: rem-calc(2 * $k-panel-margin);
+
+$border-radius: none;
+$border-radius-lg: none;
+$border-radius-sm: none;
+
+$btn-line-height: 1;
+$btn-primary-bg: $k-panel-bg2-color;
+$btn-primary-color: $k-text-color;
+$btn-primary-border: transparent;
+$btn-focus-box-shadow: none;
+$btn-active-box-shadow: none;
+
+$input-box-shadow: none;
+$input-border-color: transparent;
+$input-border-focus: transparent;

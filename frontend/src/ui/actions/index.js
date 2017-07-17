@@ -23,7 +23,17 @@ const actions = {
 
     unloggUser: function () {
         return {type: 'SET_USER', user: null};
-    }
+    },
+
+    closeLeftWin: function () {
+        return {type: 'SET_LEFT_WIN', win: null};
+    },
+
+    openLeftWin: function (id, props, children) {
+        return {type: 'SET_LEFT_WIN', win: {id, props, children}};
+    },
+
+
 
 };
 
