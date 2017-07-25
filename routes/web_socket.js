@@ -1,27 +1,34 @@
 const colors = require('colors/safe');
 
-function on_user_message (msg) {
-    if (!this.ws.user) return;
+const user_messages = {
 
-    switch (msg['$']) {
-        case 'speak':
-            send_to_all({'$': 'speak', t: msg.t, u: this.ws.user.id}, this.ws.user.id);
-            break;
+    speak: function (msg) {
+        send_to_all({'$': 'speak', t: msg.t, u: this.user.id}, this.user.id);
+    },
+
+    'game-invite': function (msg) {
+        const opponent = msg.opponent && PRESENT_USERS.get(msg.opponent);
+        if (!opponent) {
+            this.respond(msg, {fail: 'bad opponent'});
+            return false;
+        }
+
+        this.respond(msg, {fail: 'not implemented'});
     }
-}
+
+};
 
 function on_message (msg) {
-    const user = this.ws.user;
-    ws_log(`msg for [${user ? user.id : 'unknown'}]`, msg);
+    ws_log(`msg from [${this.user ? this.user.id : 'unknown'}]`, msg);
     msg = JSON.parse(msg);
 
     switch (msg['$']) {
         case 'in':
-            const new_user = {id: Number(msg.user.id), name: String(msg.user.name), ws: this.ws};
+            const new_user = {id: Number(msg.user.id), name: String(msg.user.name), send: this.send};
             if (PRESENT_USERS.has(new_user.id)) return;
 
-            if (user) PRESENT_USERS.delete(user.id);
-            this.ws.user = new_user;
+            if (this.user) PRESENT_USERS.delete(this.user.id);
+            this.user = new_user;
             PRESENT_USERS.set(new_user.id, new_user);
 
             ws_log(`in: ${new_user.name} [${new_user.id}]`);
@@ -29,11 +36,11 @@ function on_message (msg) {
             break;
 
         case 'out':
-            if (user) {
-                this.ws.user = null;
-                PRESENT_USERS.delete(user.id);
+            if (this.user) {
+                PRESENT_USERS.delete(this.user.id);
 
-                ws_log(`out: ${user.name} [${user.id}]`);
+                ws_log(`out: ${this.user.name} [${this.user.id}]`);
+                this.user = null;
                 present_users_changed();
             }
             break;
@@ -43,7 +50,11 @@ function on_message (msg) {
             break;
 
         default:
-            on_user_message.call(this, msg);
+            if (this.user) {
+                let user_action = msg['$'] || '';
+                user_action = user_messages[user_action];
+                if (typeof user_action === 'function') user_action.call(this, msg);
+            }
             break;
     }
 }
@@ -52,17 +63,27 @@ const ws_handler_creator = function (ws_app) {
     return function(ws, req) {
         try {
             const context = {
-                ws_app,
+                user: null,
+                // req,
+                // ws_app,
                 ws,
-                req,
+
                 send: function (msg) {
-                    ws.send(JSON.stringify(msg));
+                    if (typeof msg !== 'string') msg = JSON.stringify(msg);
+                    ws_log(`msg for [${context.user.id}]`, msg);
+                    ws.send(msg);
+                },
+
+                respond: function ({req_id, $}, data) {
+                    // console.log(req_id, $, data);
+                    if (typeof req_id === 'number' && typeof $ === 'string')
+                        context.send({'$': 'response', req_id, req_$: $, data});
                 }
             };
 
             ws.on('close', function () {
-               ws_log('client disconnected');
-               if (ws.user) on_message.call(context, JSON.stringify({'$': 'out'}));
+                ws_log('client disconnected');
+                if (context.user) on_message.call(context, JSON.stringify({'$': 'out'}));
             });
 
             ws.on('message', on_message.bind(context));
@@ -80,7 +101,7 @@ function send_to_all (msg, skip_id) {
     PRESENT_USERS.forEach(user => {
         if (user.id === skip_id) return;
 
-        user.ws.send(msg);
+        user.send(msg);
     });
 }
 

@@ -18,8 +18,7 @@ export default class NewMatchForm extends preact.Component {
                     className="form-control"
                     value={opponent}
                     onChange={this.onOpponentSelected}>
-                    {users.map(u => <option value={u.id}>{u.name}</option>)
-                    }
+                    {users.map(u => <option value={u.id}>{u.name}</option>)}
                 </select>
             </div>
 
@@ -42,11 +41,18 @@ export default class NewMatchForm extends preact.Component {
     onSubmit () {
         this.setState({alert_message: null});
 
-        const {app} = this.props;
+        const {app, user} = this.props;
         const {opponent} = this.state;
         if (!opponent) return;
 
-        console.log('new_match_form.onSubmit', opponent);
+        user.sendRequest('game-invite', {opponent: Number(opponent)}, (req) => {
+            if (req.fail) this.setState({alert_message: `fail: ${req.fail}`});
+            else {
+                console.log('success');
+            }
+        });
+
+
         // app.store('logged_user').req_resp_layer.request('invite', {opponent}, (req) => {
         //     if (req.fail) this.setState({alert_message: `fail: ${req.fail}`});
         //     else {

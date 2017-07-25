@@ -82,29 +82,21 @@ export default class User {
         };
 
         this.ws = ws;
-
-
-        // this.cable = ActionCable.createConsumer(`/cable?user=${this.id}${this.name}`);
-        // this.appSubscription = this.cable.subscriptions.create('AppChannel', {
-        //     received: (data) => {
-        //         if (data.req_id) this.req_resp_layer.onMessage(data);
-        //         else this.onMessage(data);
-        //     }
-        // });
-        // this.req_resp_layer = new ReqRespLayer(this.appSubscription);
+        this.pending_requests = new Map();
     }
 
     unsubscribeFromWs () {
         if (this.ws) {
             this.ws.close();
             this.ws = null;
+            this.pending_requests = null;
         }
     }
 
     speak (message) {
         if (this.ws) {
             this.ws.send(JSON.stringify({'$': 'speak', t: message}));
-            app.redux_store.dispatch(actions.addUserMessage(message, this));
+            this.app.redux_store.dispatch(actions.addUserMessage(message, this));
         }
     }
 
@@ -112,6 +104,15 @@ export default class User {
         data.to = user_id;
         console.log('user.sendMessageTo', data);
         // this.appSubscription.perform('send_to', data);
+    }
+
+    sendRequest (action, data, callback) {
+        data.$ = action;
+        const req = new Request(data, callback, this.pending_requests);
+        this.pending_requests.set(req.req_data.req_id, req);
+        Request.attachTimeout(req);
+        this.ws.send(JSON.stringify(req.req_data));
+        return req;
     }
 
     onMessage (data) {
@@ -126,8 +127,15 @@ export default class User {
                 const person = this.app.getUser(data.u);
                 if (person) this.app.redux_store.dispatch(actions.addUserMessage(data.t, person));
                 break;
-        }
 
+            case 'response':
+                const request = data.req_id && this.pending_requests.get(data.req_id);
+                if (request) {
+                    request.clearTimeout();
+                    request.performResponse(data.data);
+                }
+                break;
+        }
     }
 }
 
@@ -160,63 +168,36 @@ User.post_logout = function (clbk) {
         .then(clbk);
 };
 
-class ReqRespLayer {
-
-    constructor (sub) {
-        this._pile = new Map();
-        this.sub = sub;
-    }
-
-    request (action, data, callback) {
-        let req = new Request(data, callback);
-        this._attachRequest(req);
-        this.sub.perform(action, req.req_data);
-    }
-
-    onMessage (data) {
-        let req = this._pile.get(data.req_id);
-        if (req) {
-            req.clear();
-            req.performResponse(data);
-        }
-    }
-
-    _attachRequest (req) {
-        let timeout = setTimeout(() => {
-            timeout = null;
-            req.clear();
-            req.performTimeout();
-        }, 5000);
-
-        req.clear = () => {
-            if (timeout) clearTimeout(timeout);
-            this._pile.delete(req.req_id);
-        };
-
-        this._pile.set(req.req_id, req);
-    }
-
-}
-
 class Request {
 
-    constructor (data, waiter) {
+    constructor (data, waiter, queue) {
         this.waiter = waiter;
         this.req_data = data;
+        this.queue = queue;
 
-        this.req_id = app_utils.random_number(10);
-        data.req_id = this.req_id;
-    }
-
-    performTimeout () {
-        this.fail = 'timeout';
-        this.waiter(this);
+        this.req_data.req_id = app_utils.random_number(10);
     }
 
     performResponse (data) {
         this.resp_data = data;
         this.fail = data.fail;
         this.waiter(this);
+        this.finalize();
+    }
+
+    finalize () {
+        this.queue.delete(this.req_data.req_id);
     }
 
 }
+
+Request.attachTimeout = function (req) {
+    let timeout = setTimeout(() => {
+        timeout = null;
+        req.performResponse({fail: 'timeout'});
+    }, 5000);
+
+    req.clearTimeout = () => {
+        if (timeout) clearTimeout(timeout);
+    };
+};

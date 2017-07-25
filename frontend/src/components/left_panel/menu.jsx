@@ -91,6 +91,7 @@ export default class Menu extends preact.Component {
             children = [
                 <NewMatchForm
                     app={app}
+                    user={user}
                     users={present_users}/>
             ];
 
