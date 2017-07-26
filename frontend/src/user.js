@@ -1,5 +1,6 @@
 import app_utils from './app_utils';
 import actions from './actions';
+import App from './app';
 
 export default class User {
 
@@ -97,7 +98,7 @@ export default class User {
     speak (message) {
         if (this.ws) {
             this.ws.send(JSON.stringify({'$': 'speak', t: message}));
-            const message = this.app.klass.createMessage(message, this);
+            const message = App.createMessage(message, this);
             this.app.redux_store.dispatch(actions.addMessage(message));
         }
     }
@@ -133,7 +134,7 @@ const messages_handlers = {
     speak: function (data) {
         const person = this.app.getUser(data.u);
         if (person) {
-            const message = this.app.klass.createMessage(data.t, person);
+            const message = App.createMessage(data.t, person);
             this.app.redux_store.dispatch(actions.addMessage());
         }
     },

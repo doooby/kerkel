@@ -32,7 +32,6 @@ export default class App {
             right_win: ['value']
         });
         this.store = store;
-        this.klass = App;
     }
 
     // logoutUser () {

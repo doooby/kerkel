@@ -1,5 +1,6 @@
 import User from '../user';
 import game from './game_reducers';
+import App from '../app';
 
 const init_state = {
     logged_user: null,
@@ -26,7 +27,7 @@ function kerkelApp (state, action) {
 
                 changes.chat_messages = [
                     ...state.chat_messages,
-                    action.user.app.klass.createMessage(`logged in as ${action.user.name}`)
+                    App.createMessage(`logged in as ${action.user.name}`)
                 ];
             }
             break;

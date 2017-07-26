@@ -22,10 +22,10 @@ const user_messages = {
             this.respond(msg, {fail: 'opponent already in game'});
         }
 
-        this.user.game = new Game(this, opponent);
+        this.user.game = new Game(opponent);
         this.respond(msg);
 
-        opponent.game = Game.pending;
+        opponent.game = new Game(this.user);
         opponent.send({'$': 'game-invitation', host: this.user.id});
     }
 
@@ -59,7 +59,7 @@ function on_message (msg) {
                 PRESENT_USERS.delete(this.user.id);
 
                 ws_log(`out: ${this.user.name} [${this.user.id}]`);
-                if (this.user.game && this.user.game !== Game.pending) this.user.game.clear();
+                if (this.user.game) this.user.game.clear();
                 this.user = null;
                 present_users_changed();
             }

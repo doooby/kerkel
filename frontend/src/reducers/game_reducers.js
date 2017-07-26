@@ -1,4 +1,5 @@
 import PendingGameForm from '../components/wins/forms/pending_game_form';
+import App from '../app';
 
 
 function game (state, action) {
@@ -7,10 +8,7 @@ function game (state, action) {
     if (game === 'abandoned' && state.game) {
         changes.game = null;
         changes.right_win = null;
-        if (state.game.state !== 'pending') changes.chat_messages = [
-            ...state.chat_messages,
-            state.logged_user.app.klass.createMessage(`game abandoned`)
-        ];
+        if (state.game.state !== 'pending') add_message(state, changes, 'game abandoned');
 
     }
     else if (game.state === 'pending') {
@@ -25,3 +23,10 @@ function game (state, action) {
 }
 
 export default game;
+
+function add_message (state, changes, message) {
+    changes.chat_messages = [
+        ...state.chat_messages,
+        App.createMessage(message)
+    ];
+}
