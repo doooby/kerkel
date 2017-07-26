@@ -1,55 +1,50 @@
 import User from '../user';
-import actions from '../actions'
+import game from './game_reducers';
 
 const init_state = {
     logged_user: null,
     present_users: new Set(),
     chat_messages: [],
-    left_win: null
+    left_win: null,
+    game: null,
+    right_win: null
 };
 
 function kerkelApp (state, action) {
     if (state === undefined) { return init_state; }
+    const changes = {};
 
     switch (action.type) {
         case 'SET_USER':
-            const user = action.user;
-            const changes = {
-                logged_user: user,
-                present_users: new Set(),
-                left_win: null
-            };
+            changes.logged_user = action.user;
+            changes.present_users = new Set();
+            changes.left_win = null;
 
             if (state.logged_user) state.logged_user.unsubscribeFromWs();
-            if (user) {
-                user.subscribeToWs();
+            if (action.user) {
+                action.user.subscribeToWs();
 
                 changes.chat_messages = [
                     ...state.chat_messages,
-                    actions.addSystemMessage(`logged in as ${user.name}`).item
+                    action.user.app.klass.createMessage(`logged in as ${action.user.name}`)
                 ];
             }
-
-            return Object.assign({}, state, changes);
             break;
 
         case 'ADD_MESSAGE':
-            return Object.assign({}, state, {
-                chat_messages: [...state.chat_messages, action.item]
-            });
+            changes.chat_messages = [...state.chat_messages, action.item];
             break;
 
         case 'PRESENT_USERS_CHANGE':
-            const users = present_users(state.present_users, action.list, state.logged_user);
-            return Object.assign({}, state, {
-                present_users: users
-            });
+            changes.present_users = present_users(state.present_users, action.list, state.logged_user);
             break;
 
         case 'SET_LEFT_WIN':
-            return Object.assign({}, state, {
-                left_win: action.win
-            });
+            changes.left_win = action.win;
+            break;
+
+        case 'GAME':
+            return (game(state, action));
             break;
 
         default:
@@ -57,6 +52,8 @@ function kerkelApp (state, action) {
             break;
 
     }
+
+    return Object.assign({}, state, changes);
 }
 
 function present_users (orig_set, new_list, logged_user) {

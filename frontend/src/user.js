@@ -1,5 +1,4 @@
 import app_utils from './app_utils';
-
 import actions from './actions';
 
 export default class User {
@@ -57,7 +56,7 @@ export default class User {
         ws.onmessage = e => {
             let data = null;
             try { data = JSON.parse(e.data); } catch (e) {}
-            if (data === null) return;
+            if (data === null || !data['$']) return;
 
             switch (data['$']) {
                 case 'pong':
@@ -66,7 +65,9 @@ export default class User {
                     break;
 
                 default:
-                    this.onMessage(data);
+                    // console.log(data);
+                    const handler = messages_handlers[data['$']];
+                    if (handler) handler.call(this, data);
                     break;
             }
 
@@ -96,7 +97,8 @@ export default class User {
     speak (message) {
         if (this.ws) {
             this.ws.send(JSON.stringify({'$': 'speak', t: message}));
-            this.app.redux_store.dispatch(actions.addUserMessage(message, this));
+            const message = this.app.klass.createMessage(message, this);
+            this.app.redux_store.dispatch(actions.addMessage(message));
         }
     }
 
@@ -108,36 +110,45 @@ export default class User {
 
     sendRequest (action, data, callback) {
         data.$ = action;
-        const req = new Request(data, callback, this.pending_requests);
-        this.pending_requests.set(req.req_data.req_id, req);
-        Request.attachTimeout(req);
+        const req = new Request(data, this, callback);
+        req.prepare();
         this.ws.send(JSON.stringify(req.req_data));
         return req;
     }
 
-    onMessage (data) {
-        // console.log(data);
-        switch(data['$']) {
-            case 'present_users':
-                const users_list = data.users.map(arr => ({id: arr[0], name: arr[1]}));
-                this.app.redux_store.dispatch(actions.usersListChanged(users_list));
-                break;
-
-            case 'speak':
-                const person = this.app.getUser(data.u);
-                if (person) this.app.redux_store.dispatch(actions.addUserMessage(data.t, person));
-                break;
-
-            case 'response':
-                const request = data.req_id && this.pending_requests.get(data.req_id);
-                if (request) {
-                    request.clearTimeout();
-                    request.performResponse(data.data);
-                }
-                break;
-        }
-    }
 }
+
+const messages_handlers = {
+    response: function (data) {
+        const request = data.req_id && this.pending_requests.get(data.req_id);
+        if (request) { request.performResponse(data.data); }
+    },
+
+    present_users: function (data) {
+        const users_list = data.users.map(arr => ({id: arr[0], name: arr[1]}));
+        this.app.redux_store.dispatch(actions.usersListChanged(users_list));
+
+    },
+
+    speak: function (data) {
+        const person = this.app.getUser(data.u);
+        if (person) {
+            const message = this.app.klass.createMessage(data.t, person);
+            this.app.redux_store.dispatch(actions.addMessage());
+        }
+    },
+
+    'game-invitation': function (data) {
+        const action = actions.gamePending(this.app, data.host, false);
+        if (action) this.app.redux_store.dispatch(action);
+    },
+
+    'game-abandoned': function () {
+        const game = this.app.getState().game;
+        if (game) this.app.redux_store.dispatch(actions.gameAbandoned());
+    }
+
+};
 
 User.get_login = function (clbk) {
     fetch('/recognition', {
@@ -170,10 +181,10 @@ User.post_logout = function (clbk) {
 
 class Request {
 
-    constructor (data, waiter, queue) {
+    constructor (data, user, waiter) {
         this.waiter = waiter;
         this.req_data = data;
-        this.queue = queue;
+        this.user = user;
 
         this.req_data.req_id = app_utils.random_number(10);
     }
@@ -181,12 +192,18 @@ class Request {
     performResponse (data) {
         this.resp_data = data;
         this.fail = data.fail;
-        this.waiter(this);
         this.finalize();
+        this.waiter(this);
+    }
+
+    prepare () {
+        this.user.pending_requests.set(this.req_data.req_id, this);
+        this._clearTimeout = Request.attachTimeout(this);
     }
 
     finalize () {
-        this.queue.delete(this.req_data.req_id);
+        this.user.pending_requests.delete(this.req_data.req_id);
+        this._clearTimeout();
     }
 
 }
@@ -197,7 +214,5 @@ Request.attachTimeout = function (req) {
         req.performResponse({fail: 'timeout'});
     }, 5000);
 
-    req.clearTimeout = () => {
-        if (timeout) clearTimeout(timeout);
-    };
+    return () => { if (timeout) clearTimeout(timeout); };
 };

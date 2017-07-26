@@ -1,4 +1,5 @@
 const colors = require('colors/safe');
+const Game = require('../lib/game');
 
 const user_messages = {
 
@@ -13,7 +14,19 @@ const user_messages = {
             return false;
         }
 
-        this.respond(msg, {fail: 'not implemented'});
+        if (this.user.game !== null) {
+            this.respond(msg, {fail: 'you are already in game'});
+        }
+
+        if (opponent.game !== null) {
+            this.respond(msg, {fail: 'opponent already in game'});
+        }
+
+        this.user.game = new Game(this, opponent);
+        this.respond(msg);
+
+        opponent.game = Game.pending;
+        opponent.send({'$': 'game-invitation', host: this.user.id});
     }
 
 };
@@ -21,10 +34,16 @@ const user_messages = {
 function on_message (msg) {
     ws_log(`msg from [${this.user ? this.user.id : 'unknown'}]`, msg);
     msg = JSON.parse(msg);
+    if (!msg['$']) return;
 
     switch (msg['$']) {
         case 'in':
-            const new_user = {id: Number(msg.user.id), name: String(msg.user.name), send: this.send};
+            const new_user = {
+                id: Number(msg.user.id),
+                name: String(msg.user.name),
+                send: this.send,
+                game: null
+            };
             if (PRESENT_USERS.has(new_user.id)) return;
 
             if (this.user) PRESENT_USERS.delete(this.user.id);
@@ -40,6 +59,7 @@ function on_message (msg) {
                 PRESENT_USERS.delete(this.user.id);
 
                 ws_log(`out: ${this.user.name} [${this.user.id}]`);
+                if (this.user.game && this.user.game !== Game.pending) this.user.game.clear();
                 this.user = null;
                 present_users_changed();
             }
@@ -51,9 +71,8 @@ function on_message (msg) {
 
         default:
             if (this.user) {
-                let user_action = msg['$'] || '';
-                user_action = user_messages[user_action];
-                if (typeof user_action === 'function') user_action.call(this, msg);
+                const action_handler = user_messages[msg['$']];
+                if (action_handler) action_handler.call(this, msg);
             }
             break;
     }
@@ -69,19 +88,22 @@ const ws_handler_creator = function (ws_app) {
                 ws,
 
                 send: function (msg) {
+                    if (context.disconected) return;
                     if (typeof msg !== 'string') msg = JSON.stringify(msg);
                     ws_log(`msg for [${context.user.id}]`, msg);
                     ws.send(msg);
                 },
 
-                respond: function ({req_id, $}, data) {
-                    // console.log(req_id, $, data);
-                    if (typeof req_id === 'number' && typeof $ === 'string')
-                        context.send({'$': 'response', req_id, req_$: $, data});
+                respond: function ({req_id}, data) {
+                    // console.log(req_id, data);
+                    if (!data) data = {};
+                    if (typeof req_id === 'number')
+                        context.send({'$': 'response', req_id, data});
                 }
             };
 
             ws.on('close', function () {
+                context.disconected = true;
                 ws_log('client disconnected');
                 if (context.user) on_message.call(context, JSON.stringify({'$': 'out'}));
             });

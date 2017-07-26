@@ -32,6 +32,7 @@ export default class App {
             right_win: ['value']
         });
         this.store = store;
+        this.klass = App;
     }
 
     // logoutUser () {
@@ -41,49 +42,50 @@ export default class App {
     //     });
     // }
 
-    onGameMessage (data) {
-        const from = data.from;
-        const message = data.message;
-        const state = this.redux_store.getState();
-        let game = this.store('game');
+    // onGameMessage (data) {
+    //     const from = data.from;
+    //     const message = data.message;
+    //     const state = this.redux_store.getState();
+    //     let game = this.store('game');
+    //
+    //     if (game) {
+    //         if (game.opponent.id === from && game.game_id === data.game)
+    //             game.onMessage(message, data);
+    //
+    //         else {
+    //             if (['invitation'].includes(message)) {
+    //                 state.logged_user.sendMessageTo(from, {
+    //                     game: data.game,
+    //                     message: 'rejection',
+    //                     orig_message: message,
+    //                     reason: 'already in another game'
+    //                 });
+    //             }
+    //         }
+    //
+    //     } else {
+    //         if (message === 'invitation' && from) {
+    //             const challenger = this.getUser(from);
+    //             if (challenger) {
+    //                 this.printAppMessage(`invitation from ${challenger.name}`);
+    //                 this.commenceGame(data.game, challenger, false);
+    //             }
+    //         }
+    //
+    //     }
+    // }
 
-        if (game) {
-            if (game.opponent.id === from && game.game_id === data.game)
-                game.onMessage(message, data);
+    // commenceGame (game_id, opponent, local_is_challenger) {
+    //     const game = new Game(this, game_id, opponent);
+    //     if (local_is_challenger) game.prepareAsChallenger();
+    //     else game.prepareAsChallenged();
+    //     this.store.game.set(game);
+    // }
 
-            else {
-                if (['invitation'].includes(message)) {
-                    state.logged_user.sendMessageTo(from, {
-                        game: data.game,
-                        message: 'rejection',
-                        orig_message: message,
-                        reason: 'already in another game'
-                    });
-                }
-            }
-
-        } else {
-            if (message === 'invitation' && from) {
-                const challenger = this.getUser(from);
-                if (challenger) {
-                    this.printAppMessage(`invitation from ${challenger.name}`);
-                    this.commenceGame(data.game, challenger, false);
-                }
-            }
-
-        }
-    }
-
-    commenceGame (game_id, opponent, local_is_challenger) {
-        const game = new Game(this, game_id, opponent);
-        if (local_is_challenger) game.prepareAsChallenger();
-        else game.prepareAsChallenged();
-        this.store.game.set(game);
-    }
-
-    printAppMessage (message) {
-        this.redux_store.dispatch(actions.addSystemMessage(message));
-    }
+    // printAppMessage (message) {
+    //     message = App.createMessage(message);
+    //     this.redux_store.dispatch(actions.addMessage(message));
+    // }
 
     makeContainerResponsive () {
         this.makeContainerResponsive._callback = app_utils.throttle(
@@ -108,3 +110,9 @@ export default class App {
     }
 
 }
+
+const system_person = {name: '>>', color: 0xffffff};
+App.createMessage = function (message, person) {
+    if (!person) person = system_person;
+    return {message, person};
+};

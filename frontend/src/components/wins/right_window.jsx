@@ -2,10 +2,11 @@ import preact from 'preact';
 
 export default class RightWindow extends preact.Component {
 
-    render (ps) {
+    render ({form}) {
+        const [form_klass, form_props] = form;
         let style = {
-            width: '150px',
-            "min-height": '30px',
+            width: '200px',
+            'min-height': '30px',
             right: 0,
             top: 0
         };
@@ -13,16 +14,16 @@ export default class RightWindow extends preact.Component {
         return <div
             className="k-panel k-window"
             style={style}>
-            {ps.children}
+            {preact.h(form_klass, form_props)}
         </div>;
     }
 
-    componentDidMount () {
-        if (this.props.onMounted) this.props.onMounted.call(this);
-    }
-
-    componentWillUnmount () {
-        if (this.props.onUnmounting) this.props.onUnmounting.call(this);
-    }
+    // componentDidMount () {
+    //     if (this.props.onMounted) this.props.onMounted.call(this);
+    // }
+    //
+    // componentWillUnmount () {
+    //     if (this.props.onUnmounting) this.props.onUnmounting.call(this);
+    // }
 
 }

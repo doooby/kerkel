@@ -14,7 +14,7 @@ export default class WinsContainer extends preact.Component {
     render ({app}, {left, right}) {
         return <div className="k-wins-container">
             {left && preact.h(LeftWindow, left.props, left.children)}
-            {right && preact.h(RightWindow, right.props, right.children)}
+            {right && preact.h(RightWindow, {form: right})}
         </div>;
     }
 

@@ -1,13 +1,10 @@
 import User from '../user';
+import Game from '../game';
 
 const actions = {
 
-    addUserMessage: function (message, person) {
-        return {type: 'ADD_MESSAGE', item: {message, person}};
-    },
-
-    addSystemMessage: function (message) {
-        return {type: 'ADD_MESSAGE', item: {message, person: system_person}};
+    addMessage: function (message) {
+        return {type: 'ADD_MESSAGE', item: message};
     },
 
     usersListChanged: function (list) {
@@ -33,10 +30,23 @@ const actions = {
         return {type: 'SET_LEFT_WIN', win: {id, props, children}};
     },
 
+    gamePending: function (app, opponent_id, host_is_local) {
+        const state = app.getState();
+        const opponent = opponent_id && app.getUser(opponent_id, state);
+        if (!opponent) return;
 
+        const game = new Game(
+            (host_is_local ? state.logged_user : opponent),
+            (host_is_local ? opponent : state.logged_user),
+            host_is_local
+            );
+        return {type: 'GAME', game};
+    },
+
+    gameAbandoned: function () {
+        return {type: 'GAME', game: 'abandoned'};
+    }
 
 };
-
-const system_person = {name: '>>', color: 0xffffff};
 
 export default actions;

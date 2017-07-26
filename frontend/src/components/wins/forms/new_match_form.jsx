@@ -1,4 +1,5 @@
 import preact from 'preact';
+import actions from '../../../actions';
 
 export default class NewMatchForm extends preact.Component {
 
@@ -42,25 +43,16 @@ export default class NewMatchForm extends preact.Component {
         this.setState({alert_message: null});
 
         const {app, user} = this.props;
-        const {opponent} = this.state;
+        const opponent  = Number(this.state.opponent);
         if (!opponent) return;
 
-        user.sendRequest('game-invite', {opponent: Number(opponent)}, (req) => {
+
+        user.sendRequest('game-invite', {opponent: opponent}, (req) => {
             if (req.fail) this.setState({alert_message: `fail: ${req.fail}`});
             else {
-                console.log('success');
+                const action = actions.gamePending(app, opponent, true);
+                if (action) app.redux_store.dispatch(action);
             }
         });
-
-
-        // app.store('logged_user').req_resp_layer.request('invite', {opponent}, (req) => {
-        //     if (req.fail) this.setState({alert_message: `fail: ${req.fail}`});
-        //     else {
-        //         app.store.left_win.close();
-        //         opponent = app.store.present_users.find(u => u.id === opponent);
-        //         if (opponent) app.commenceGame(req.resp_data.game, opponent, true);
-        //     }
-        // });
-
     }
 }
