@@ -97,7 +97,7 @@ export default class User {
 
     speak (message) {
         if (this.ws) {
-            this.ws.send(JSON.stringify({'$': 'speak', t: message}));
+            this.ws.send(JSON.stringify({'$': 'speak', text: message}));
             const message = App.createMessage(message, this);
             this.app.redux_store.dispatch(actions.addMessage(message));
         }
@@ -132,10 +132,10 @@ const messages_handlers = {
     },
 
     speak: function (data) {
-        const person = this.app.getUser(data.u);
+        const person = this.app.getUser(data.user);
         if (person) {
-            const message = App.createMessage(data.t, person);
-            this.app.redux_store.dispatch(actions.addMessage());
+            const message = App.createMessage(data.text, person);
+            this.app.redux_store.dispatch(actions.addMessage(message));
         }
     },
 

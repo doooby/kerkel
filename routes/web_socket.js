@@ -1,10 +1,12 @@
 const colors = require('colors/safe');
+
 const Game = require('../lib/game');
+const User = require('../lib/user');
 
 const user_messages = {
 
     speak: function (msg) {
-        send_to_all({'$': 'speak', t: msg.t, u: this.user.id}, this.user.id);
+        send_to_all({'$': 'speak', text: msg.text, user: this.user.id}, this.user.id);
     },
 
     'game-invite': function (msg) {
@@ -26,7 +28,7 @@ const user_messages = {
         this.respond(msg);
 
         opponent.game = new Game(this.user);
-        opponent.send({'$': 'game-invitation', host: this.user.id});
+        opponent.context.send({'$': 'game-invitation', host: this.user.id});
     }
 
 };
@@ -36,20 +38,13 @@ function on_message (msg) {
 
     switch (msg['$']) {
         case 'in':
-            const new_user = {
-                id: Number(msg.user.id),
-                name: String(msg.user.name),
-                send: this.send,
-                game: null
-            };
-            if (PRESENT_USERS.has(new_user.id)) return;
-
-            if (this.user) PRESENT_USERS.delete(this.user.id);
-            this.user = new_user;
-            PRESENT_USERS.set(new_user.id, new_user);
-
-            ws_log(`in: ${new_user.name} [${new_user.id}]`);
-            present_users_changed();
+            const err = this.connectUser(msg.user.id, msg.user.name);
+            if (err) {
+                ws_log(`connection error: ${err}`);
+            } else {
+                ws_log(`in: ${this.user.name} [${this.user.id}]`);
+                present_users_changed();
+            }
             break;
 
         case 'out':
@@ -125,6 +120,16 @@ class Context {
             this.send({'$': 'response', req_id, data});
     }
 
+    connectUser (id, name) {
+        if (this.user) return 'cannot reconnect';
+
+        const user = new User(this, id, name);
+        if (PRESENT_USERS.has(user.id)) return 'already present';
+
+        this.user = user;
+        PRESENT_USERS.set(user.id, user);
+    }
+
 }
 
 
@@ -133,7 +138,7 @@ function send_to_all (msg, skip_id) {
     PRESENT_USERS.forEach(user => {
         if (user.id === skip_id) return;
 
-        user.send(msg);
+        user.context.send(msg);
     });
 }
 
@@ -153,7 +158,11 @@ function ws_log (...args) {
 module.exports = ws_handler_creator;
 
 if (process.env.NODE_ENV === 'test') {
+    // to be testable
     ws_handler_creator.Context = Context;
     ws_handler_creator.PRESENT_USERS = PRESENT_USERS;
     ws_handler_creator.on_message = on_message;
+
+    // do not log
+    ws_log = () => {}
 }
