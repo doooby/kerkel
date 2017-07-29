@@ -11,14 +11,14 @@ const actions = {
         return {type: 'PRESENT_USERS_CHANGE', list: list};
     },
 
-    loggUser: function (user_data, app) {
+    logUser: function (user_data, app) {
         const user = new User(user_data);
         user.app = app;
         user.assignNewColor();
         return {type: 'SET_USER', user};
     },
 
-    unloggUser: function () {
+    unlogUser: function () {
         return {type: 'SET_USER', user: null};
     },
 

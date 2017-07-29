@@ -12,7 +12,7 @@ function sendMessage(ctx, msg) {
 }
 
 function message ($, data) {
-    if (typeof data !== 'object') data = {};
+    if (!data) data = {};
     data['$'] = $;
     return data;
 }
@@ -86,21 +86,74 @@ describe('user messages', () => {
     beforeEach(() => {
         users.clear();
 
-        ctxs.push(wsCtx());
-        ctxs.push(wsCtx());
-        ctxs.push(wsCtx());
-
+        ctxs[0] = wsCtx();
         ctxs[0].connectUser(666, 'kkk');
+        ctxs[1] = wsCtx();
         ctxs[1].connectUser(15, 'another');
+        ctxs[2] = wsCtx();
         ctxs[2].connectUser(7, 'lucky');
     });
 
-    it('speak', () => {
+    it('$: speak', () => {
         sendMessage(ctxs[1], message('speak', {text: 'Hi there!'}));
         const msg = message('speak', {text: 'Hi there!', user: 15});
         expect(responses(ctxs[0])).toEqual([msg]);
         expect(responses(ctxs[1])).toEqual([]);
         expect(responses(ctxs[2])).toEqual([msg]);
+    });
+
+    describe('game', () => {
+
+        it('clean game on user out', () => {
+            ctxs[0].user.createGame(ctxs[1].user);
+            expect(ctxs[0].user.game).not.toBeNull();
+            expect(ctxs[1].user.game).not.toBeNull();
+            sendMessage(ctxs[1], message('out'));
+            expect(responses(ctxs[0])).toEqual([
+                message('game_abandoned'),
+                message('present_users', {users: [
+                    [666, 'kkk'],
+                    [7, 'lucky'],
+                ]})
+            ]);
+            expect(responses(ctxs[1])).toEqual([
+                message('game_abandoned')
+            ]);
+        });
+
+        it('$: game_invite bad id', () => {
+            sendMessage(ctxs[0], message('game_invite', {req_id: 1, opponent: 1}));
+            expect(responses(ctxs[0])).toEqual([
+               message('response', {req_id: 1, fail: 'bad opponent'})
+            ]);
+        });
+
+        it('$: game_invite user in game', () => {
+            ctxs[0].user.game = {};
+            sendMessage(ctxs[0], message('game_invite', {req_id: 1, opponent: 15}));
+            expect(responses(ctxs[0])).toEqual([
+                message('response', {req_id: 1, fail: 'you are already in game'})
+            ]);
+        });
+
+        it('$: game_invite opponent in game', () => {
+            ctxs[1].user.game = {};
+            sendMessage(ctxs[0], message('game_invite', {req_id: 1, opponent: 15}));
+            expect(responses(ctxs[0])).toEqual([
+                message('response', {req_id: 1, fail: 'opponent already in game'})
+            ]);
+        });
+
+        it('$: game_invite', () => {
+            sendMessage(ctxs[0], message('game_invite', {req_id: 1, opponent: 15}));
+            expect(responses(ctxs[0])).toEqual([
+                message('response', {req_id: 1})
+            ]);
+            expect(responses(ctxs[1])).toEqual([
+                message('game_invited', {host: 666})
+            ]);
+        });
+
     });
 
 });

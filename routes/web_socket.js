@@ -1,6 +1,4 @@
 const colors = require('colors/safe');
-
-const Game = require('../lib/game');
 const User = require('../lib/user');
 
 const user_messages = {
@@ -9,32 +7,21 @@ const user_messages = {
         send_to_all({'$': 'speak', text: msg.text, user: this.user.id}, this.user.id);
     },
 
-    'game-invite': function (msg) {
-        const opponent = msg.opponent && PRESENT_USERS.get(msg.opponent);
+    game_invite: function (msg) {
+        const opponent = msg.opponent && PRESENT_USERS.get(Number(msg.opponent));
         if (!opponent) {
             this.respond(msg, {fail: 'bad opponent'});
             return false;
         }
 
-        if (this.user.game !== null) {
-            this.respond(msg, {fail: 'you are already in game'});
-        }
-
-        if (opponent.game !== null) {
-            this.respond(msg, {fail: 'opponent already in game'});
-        }
-
-        this.user.game = new Game(opponent);
-        this.respond(msg);
-
-        opponent.game = new Game(this.user);
-        opponent.context.send({'$': 'game-invitation', host: this.user.id});
+        this.user.tryInitGame(opponent, msg);
     }
 
 };
 
 function on_message (msg) {
     if (!msg['$']) return;
+    const user = this.user;
 
     switch (msg['$']) {
         case 'in':
@@ -48,12 +35,14 @@ function on_message (msg) {
             break;
 
         case 'out':
-            if (this.user) {
-                PRESENT_USERS.delete(this.user.id);
-
-                ws_log(`out: ${this.user.name} [${this.user.id}]`);
-                if (this.user.game) this.user.game.clear();
+            if (user) {
+                PRESENT_USERS.delete(user.id);
                 this.user = null;
+                ws_log(`out: ${user.name} [${user.id}]`);
+                if (user.game) {
+                    user.game.opponent.game.clear();
+                    user.game.clear();
+                }
                 present_users_changed();
             }
             break;
@@ -115,9 +104,11 @@ class Context {
 
     respond ({req_id}, data) {
         // console.log(req_id, data);
+        if (typeof req_id !== 'number') return;
         if (!data) data = {};
-        if (typeof req_id === 'number')
-            this.send({'$': 'response', req_id, data});
+        data.req_id = req_id;
+        data['$'] = 'response';
+        this.send(data);
     }
 
     connectUser (id, name) {
