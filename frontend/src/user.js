@@ -8,22 +8,11 @@ export default class User {
         this.id = Number(id);
         this.name = name;
         this.status = true;
-
         this.color = 0xffffff;
-
-        this._on_status_changed = [];
-        this['changed'] = () => {
-            this._on_status_changed.forEach(clbk => clbk(this));
-        }
     }
 
     assignNewColor () {
         this.color = app_utils.next_color();
-    }
-
-    onStatusChanged (callback) {
-        if (typeof callback !== 'function') throw 'User#onStatusChanged: bad arg';
-        this._on_status_changed.push(callback);
     }
 
     subscribeToWs () {
@@ -122,7 +111,7 @@ export default class User {
 const messages_handlers = {
     response: function (data) {
         const request = data.req_id && this.pending_requests.get(data.req_id);
-        if (request) { request.performResponse(data.data); }
+        if (request) { request.performResponse(data); }
     },
 
     present_users: function (data) {
@@ -139,12 +128,12 @@ const messages_handlers = {
         }
     },
 
-    'game-invitation': function (data) {
+    game_invited: function (data) {
         const action = actions.gamePending(this.app, data.host, false);
         if (action) this.app.redux_store.dispatch(action);
     },
 
-    'game-abandoned': function () {
+    game_abandoned: function () {
         const game = this.app.getState().game;
         if (game) this.app.redux_store.dispatch(actions.gameAbandoned());
     }

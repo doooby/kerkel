@@ -7,7 +7,7 @@ const user_messages = {
         send_to_all({'$': 'speak', text: msg.text, user: this.user.id}, this.user.id);
     },
 
-    game_invite: function (msg) {
+    game_invitation: function (msg) {
         const opponent = msg.opponent && PRESENT_USERS.get(Number(msg.opponent));
         if (!opponent) {
             this.respond(msg, {fail: 'bad opponent'});
@@ -72,7 +72,7 @@ const ws_handler_creator = function (ws_app) {
             });
 
             ws.on('message', (json_text) => {
-                ws_log(`msg from [${this.user ? this.user.id : 'unknown'}]`, json_text);
+                ws_log(`msg from [${context.user ? context.user.id : 'unknown'}]`, json_text);
                 const msg = JSON.parse(json_text);
                 on_message.call(context, msg);
             });

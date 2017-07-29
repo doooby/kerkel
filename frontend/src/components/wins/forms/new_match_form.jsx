@@ -47,7 +47,7 @@ export default class NewMatchForm extends preact.Component {
         if (!opponent) return;
 
 
-        user.sendRequest('game-invite', {opponent: opponent}, (req) => {
+        user.sendRequest('game_invitation', {opponent: opponent}, (req) => {
             if (req.fail) this.setState({alert_message: `fail: ${req.fail}`});
             else {
                 const action = actions.gamePending(app, opponent, true);

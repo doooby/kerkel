@@ -57,7 +57,7 @@ export default class LoginForm extends preact.Component {
 
         User.post_login(name, (data) => {
             if (data.user) {
-                app.redux_store.dispatch(actions.loggUser(data.user));
+                app.redux_store.dispatch(actions.logUser(data.user));
             }
             else if (data.reason) this.setState({alert_message: data.reason});
         });

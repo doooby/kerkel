@@ -39,7 +39,7 @@ function default_script () {
             app.k3d.initSession();
         }
         User.get_login(data => {
-            if (data.user) app.redux_store.dispatch(actions.loggUser(data.user, app));
+            if (data.user) app.redux_store.dispatch(actions.logUser(data.user, app));
         });
     });
 
@@ -54,7 +54,7 @@ function ai_script () {
             app.makeContainerResponsive();
             ai_random_game_init(app);
 
-            app.redux_store.dispatch(actions.loggUser({
+            app.redux_store.dispatch(actions.logUser({
                 id: app_utils.random_number(20),
                 name: (app_utils.get_url_params('name') || 'user')
             }, app));
@@ -85,7 +85,7 @@ function many_boards_script () {
                 app.k3d.initSession();
             }
 
-            app.redux_store.dispatch(actions.loggUser({
+            app.redux_store.dispatch(actions.logUser({
                 id: app_utils.random_number(20),
                 name: names[i]
             }, app));

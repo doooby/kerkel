@@ -7,13 +7,16 @@ export default class UsersList extends preact.Component {
         this.state.users = [];
     }
 
-    render ({app}, {users}) {
+    render({app}, {users}) {
         return <div className="k-users-list">
-            {users.map(user => <UserRow user={user} app={app} />)}
+            {users.map(user => <div className="k-user">
+                <span className={app.utils.css('_status', (user.status && '_online'))}>&nbsp;</span>
+                <span className="_name" style={{color: app.utils.color_to_css(user.color)}}>{user.name}</span>
+            </div>)}
         </div>;
     }
 
-    componentDidMount () {
+    componentDidMount() {
         const {app} = this.props;
 
         let users_was = null;
@@ -26,28 +29,8 @@ export default class UsersList extends preact.Component {
         });
     }
 
-    componentWillUnmount () {
+    componentWillUnmount() {
         this.store_unsibscribe();
-    }
-
-}
-
-class UserRow extends preact.Component {
-
-    constructor(props) {
-        super(props);
-
-        this.state.status = this.props.user.status;
-        this.props.user.onStatusChanged( user => {
-            this.setState({status: user.status});
-        });
-    }
-
-    render ({app, user}, {status}) {
-        return <div className="k-user">
-            <span className={app.utils.css('_status', (status && '_online'))}>&nbsp;</span>
-            <span className="_name" style={{color: app.utils.color_to_css(user.color)}}>{user.name}</span>
-        </div>;
     }
 
 }
