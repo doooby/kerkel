@@ -32,8 +32,6 @@ const user_messages = {
 };
 
 function on_message (msg) {
-    ws_log(`msg from [${this.user ? this.user.id : 'unknown'}]`, msg);
-    msg = JSON.parse(msg);
     if (!msg['$']) return;
 
     switch (msg['$']) {
@@ -81,34 +79,19 @@ function on_message (msg) {
 const ws_handler_creator = function (ws_app) {
     return function(ws, req) {
         try {
-            const context = {
-                user: null,
-                // req,
-                // ws_app,
-                ws,
-
-                send: function (msg) {
-                    if (context.disconected) return;
-                    if (typeof msg !== 'string') msg = JSON.stringify(msg);
-                    ws_log(`msg for [${context.user.id}]`, msg);
-                    ws.send(msg);
-                },
-
-                respond: function ({req_id}, data) {
-                    // console.log(req_id, data);
-                    if (!data) data = {};
-                    if (typeof req_id === 'number')
-                        context.send({'$': 'response', req_id, data});
-                }
-            };
+            const context = new Context(ws);
 
             ws.on('close', function () {
                 context.disconected = true;
                 ws_log('client disconnected');
-                if (context.user) on_message.call(context, JSON.stringify({'$': 'out'}));
+                if (context.user) on_message.call(context, {'$': 'out'});
             });
 
-            ws.on('message', on_message.bind(context));
+            ws.on('message', (json_text) => {
+                ws_log(`msg from [${this.user ? this.user.id : 'unknown'}]`, json_text);
+                const msg = JSON.parse(json_text);
+                on_message.call(context, msg);
+            });
             ws_log('client connected');
         }
         catch (e) {
@@ -117,6 +100,33 @@ const ws_handler_creator = function (ws_app) {
         }
     };
 };
+
+class Context {
+
+    constructor (ws) {
+        this.ws = ws;
+        this.user = null;
+        this.disconected = false;
+    }
+
+    send (msg) {
+        if (this.disconected) return;
+        if (typeof msg !== 'string') msg = JSON.stringify(msg);
+        if (this.user) ws_log(`msg for [${this.user.id}]`, msg);
+        this.ws.send(msg, function (err) {
+            if (err) ws_log(colors.bold.red('send fail'), err);
+        });
+    }
+
+    respond ({req_id}, data) {
+        // console.log(req_id, data);
+        if (!data) data = {};
+        if (typeof req_id === 'number')
+            this.send({'$': 'response', req_id, data});
+    }
+
+}
+
 
 function send_to_all (msg, skip_id) {
     msg = JSON.stringify(msg);
@@ -141,3 +151,9 @@ function ws_log (...args) {
 }
 
 module.exports = ws_handler_creator;
+
+if (process.env.NODE_ENV === 'test') {
+    ws_handler_creator.Context = Context;
+    ws_handler_creator.PRESENT_USERS = PRESENT_USERS;
+    ws_handler_creator.on_message = on_message;
+}

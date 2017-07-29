@@ -11,10 +11,24 @@ export default class PendingGameForm extends preact.Component {
 
     }
 
-    render () {
+    render ({game}) {
+
+
+        if (game.host) {
+            return <div>
+hostuješ
+
+
+            </div>;
+
+
+        }
+
         return <div>
-            jeeeeeee
+            jsi vyzván
         </div>;
     }
+
+
 
 }
